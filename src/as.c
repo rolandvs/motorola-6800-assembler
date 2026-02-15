@@ -26,11 +26,10 @@ int main(int argc, char *argv[])
 {
 	char	**np;
 	char	*i;
-	FILE	*fopen();
 	int	j = 0;
 
 	if(argc < 2){
-		printf("Usage: %s [files]\n",argv[j]);
+		fprintf(stderr,"Usage: %s <file...> [options]\n",argv[j]);
 		exit(1);
 		}
 	  Argv = argv;
@@ -43,13 +42,23 @@ int main(int argc, char *argv[])
 	  N_files = j-1;
 	 if (j < argc )
 	  {
-	  argv[j]++;
 	  while (j<argc)
 	   {
+	   if (*argv[j] == '-')
+	     argv[j]++;
 	   for (i = argv[j]; *i != 0; i++)
 	     if ((*i <= 'Z') && (*i >= 'A'))
 	       *i = *i + 32;
-	   if (strcmp(argv[j],"l")==0)
+	   if (strcmp(argv[j],"o")==0) {
+		 if (++j < argc) {
+		   strcpy(Obj_name,argv[j]);
+		   }
+		 else {
+		   fprintf(stderr,"-o requires argument\n");
+		   exit(1);
+		   }
+		 }
+	   else if (strcmp(argv[j],"l")==0)
 	     Lflag = 1;
 	   else if (strcmp(argv[j],"nol")==0)
 	     Lflag = 0;
@@ -64,6 +73,10 @@ int main(int argc, char *argv[])
 	    j++;
 	   }
 	  }
+
+	if( (Objfil = fopen(Obj_name,"w")) == NULL)
+		fatal("Can't create object file");
+
 	root = NULL;
 
 	Cfn = 0;
@@ -105,7 +118,6 @@ int main(int argc, char *argv[])
 
 void initialize(void)
 {
-	FILE	*fopen();
 	int	i = 0;
 
 #ifdef DEBUG
@@ -129,8 +141,6 @@ void initialize(void)
 	}
 	while (Obj_name[i++] != 0);
 	strcat(Obj_name,".s19");  /* append .out to file name. */
-	if( (Objfil = fopen(Obj_name,"w")) == NULL)
-		fatal("Can't create object file");
 	fwdinit();	/* forward ref init */
 	localinit();	/* target machine specific init. */
 }
@@ -150,12 +160,10 @@ void re_init(void)
 
 void make_pass(void)
 {
-	char	*fgets();
-
 #ifdef DEBUG
 	printf("Pass %d\n",Pass);
 #endif
-	while( fgets(Line,MAXBUF-1,Fd) != (char *)NULL ){
+	while( fgets(Line,MAXBUF-1,Fd) != (char *)NULL && Line[0] != DOS_EOF ){
 		Line_num++;
 		P_force = 0;	/* No force unless bytes emitted */
 		N_page = 0;
@@ -177,7 +185,7 @@ int parse_line(void)
 {
 	register char *ptrfrm = Line;
 	register char *ptrto = Label;
-	char	*skip_white();
+	char	*skip_white(char *);
 
 	if( *ptrfrm == '*' || *ptrfrm == '\n' )
 		return(0);	/* a comment line */
@@ -197,7 +205,7 @@ int parse_line(void)
 	ptrfrm = skip_white(ptrfrm);
 
 	ptrto = Operand;
-	while( *ptrfrm != NEWLINE )
+	while( *ptrfrm != NEWLINE && *ptrfrm != CR )
 		*ptrto++ = *ptrfrm++;
 	*ptrto = EOS;
 
@@ -215,7 +223,6 @@ int parse_line(void)
 void process(void)
 {
 	register struct oper *i;
-	struct oper *mne_look();
 
 	Old_pc = Pc;		/* setup `old' program counter */
 	Optr = Operand; 	/* point to beginning of operand field */
