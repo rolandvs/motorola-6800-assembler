@@ -205,9 +205,13 @@ int parse_line(void)
 	ptrfrm = skip_white(ptrfrm);
 
 	ptrto = Operand;
-	while( *ptrfrm != NEWLINE && *ptrfrm != CR )
+	// handle ';' as comment. Make sure '*' is only used at beginning of a line!
+	while( *ptrfrm != NEWLINE && *ptrfrm != CR && *ptrfrm != ';')
 		*ptrto++ = *ptrfrm++;
 	*ptrto = EOS;
+	// trailing whitespace removal from operand
+	while( ptrto > Operand && ( *(ptrto-1) == ' ' || *(ptrto-1) == '\t' ) )
+		*--ptrto = EOS;
 
 #ifdef DEBUG
 	printf("Label-%s-\n",Label);
