@@ -2,7 +2,7 @@
 
 This repository contains the source code to build the Motorola Cross Assemblers for their 6800 family of 8bit processors.  This code was originally published in 1984 and then ported to the IBM PC and republished in 1987.  I want to give full credit to those who developed this code and my full respect for their work.
 
-My intent is to keep the source code as close to the original as possible.  The original source code was written in pre-ANSI C, so it required some editing to bring it up to the ANSI C standard.  It was also designed to have one main c file where you had to comment in and out the correct *.h and *.c files to build the assemblers for the different microprocessors in the 6800 family.  I updated this to build each module into its own object file and then directed the linker to include the appropriate object files for the different assemblers for the various microprocessors.  I also added a directory structure where the source code is kept in the ./src directory, object files are placed in the ./obj directory, and binary files are placed in the ./bin directory.
+My intent is to keep the source code as close to the original as possible.  The original source code was written in pre-ANSI C, so it required some editing to bring it up to the ANSI C standard.  It was also designed to have one main c file where you had to comment in and out the correct `*.h` and `*.c` files to build the assemblers for the different microprocessors in the 6800 family.  I updated this to build each module into its own object file and then directed the linker to include the appropriate object files for the different assemblers for the various microprocessors.  I also added a directory structure where the source code is kept in the `./src directory`, object files are placed in the `./obj` directory, and binary files are placed in the `./bin` directory.
 
 The code can be built using the gcc compiler on Windows, Linux, and macOS (and also using the native Xcode command line tools macOS).
 
@@ -19,6 +19,11 @@ This module will build the following binaries for the specified Motorola micropr
 ## About This Fork
 
 This fork includes a new `-o <path>` option to specify the output file path, changes to allow assembly of DOS-formatted source files, error output on stderr, and the addition of an install target in the Makefile. It has been built with Xcode 26.0.1 and tested on macOS 26.0.1
+
+### Comments
+
+Some sources use `;` as comment in the same way `*` is used. The fix added is to accept both `*;` on a comment line with or without leading tabs or spaces. After the operand only `;` is allowed for good reason (e.g., `BRA *`). Furthermore any trailing spaces and tabs are removed from the `Operand`.
+
 
 ## Compiling The Source Code
 
@@ -170,7 +175,7 @@ PUT        f0bb *0018 0029
 
 ## Documentation
 
-I've included two files in the ./documentation directory.  File `assembler.txt` is the original documentation included with the sources for the assemblers.  The other file, `motorola_cross_asm_manual.pdf` is a manual for the Motorola assemblers that was published in 1990.  The information in this second file is not absolutely consistent with the assemblers used here, but it seems to be close and is a much more complete document than the text file.  So use at your own discretion.
+I've included two files in the `./documentation` directory.  File `assembler.txt` is the original documentation included with the sources for the assemblers.  The other file, `motorola_cross_asm_manual.pdf` is a manual for the Motorola assemblers that was published in 1990.  The information in this second file is not absolutely consistent with the assemblers used here, but it seems to be close and is a much more complete document than the text file.  So use at your own discretion.
 
 That's it for now...
 

@@ -179,6 +179,18 @@ void make_pass(void)
 
 
 /*
+ * is_comment_line --- check if * or ; are with leading tabs or spaces
+ */
+static int is_comment_line(char *p)
+{
+	// skip any leading space or tab
+	while( *p == ' ' || *p == '\t' )
+		p++;
+	return( *p == '*' || *p == ';' || *p == '\n' || *p == '\0');
+}
+
+
+/*
  *	parse_line --- split input line into label, op and operand
  */
 int parse_line(void)
@@ -187,7 +199,8 @@ int parse_line(void)
 	register char *ptrto = Label;
 	char	*skip_white(char *);
 
-	if( *ptrfrm == ';' || *ptrfrm == '*' || *ptrfrm == '\n' )
+//	if( *ptrfrm == ';' || *ptrfrm == '*' || *ptrfrm == '\n' )
+	if( is_comment_line (Line) )
 		return(0);	/* a comment line */
 
 	while( delim(*ptrfrm)== NO )
