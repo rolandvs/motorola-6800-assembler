@@ -19,19 +19,52 @@ void re_init(void);
 void process(void);
 int parse_line(void);
 
+
+
+/*
+ * help - using -h or no argument will show the help
+ */
+static void usage(const char *progname)
+{
+    fprintf(stderr, "Usage: %s <file...> [options]\n", progname);
+    fprintf(stderr, "Options:\n");
+    fprintf(stderr, "  -o <file>  output object file name\n");
+    fprintf(stderr, "  -l         enable listing\n");
+    fprintf(stderr, "  -nol       disable listing\n");
+    fprintf(stderr, "  -c         enable cycle counts\n");
+    fprintf(stderr, "  -noc       disable cycle counts\n");
+    fprintf(stderr, "  -s         enable symbol table\n");
+    fprintf(stderr, "  -cre       enable cross reference\n");
+    fprintf(stderr, "  -h         this help\n");
+}
+
+
 /*
 	as ---	cross assembler main program
  */
 int main(int argc, char *argv[])
 {
-	char	**np;
-	char	*i;
+	char **np;
+	char *i;
 	int	j = 0;
 
-	if(argc < 2){
-		fprintf(stderr,"Usage: %s <file...> [options]\n",argv[j]);
-		exit(1);
+	// first check for help before anything else
+	for (j=1; j<argc; j++)
+	{
+		if( strcmp(argv[j], "-h") == 0) 
+		{
+			usage(argv[0]);
+			exit(0);
 		}
+	}
+
+	if(argc < 2)
+	{
+		fprintf(stderr,"%s: no input file specified\n",argv[0]);
+		fprintf(stderr,"Try '%s -h'  for help\n",argv[0]);
+		exit(1);
+	}
+
 	  Argv = argv;
 	  initialize();
 	  while ((*argv[j] != '-') && (j<argc))
