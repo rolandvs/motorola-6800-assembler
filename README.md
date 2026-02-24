@@ -20,9 +20,11 @@ This module will build the following binaries for the specified Motorola micropr
 
 This fork includes a new `-o <path>` option to specify the output file path, changes to allow assembly of DOS-formatted source files, error output on stderr, and the addition of an install target in the Makefile. It has been built with Xcode 26.0.1 and tested on macOS 26.0.1
 
-### Comments
+## About my fork (rolandvs)
 
 Some sources use `;` as comment in the same way `*` is used. The fix added is to accept both `*;` on a comment line with or without leading tabs or spaces. After the operand only `;` is allowed for good reason (e.g., `BRA *`). Furthermore any trailing spaces and tabs are removed from the `Operand`.
+
+Some sources that can be assembled using `a68` use labels that exceed 16 characters (the limit of this macro-assembler `as`). The maximum label length is raised to 24 allowing more sources to be assembled without change.
 
 
 ## Compiling The Source Code
