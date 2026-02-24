@@ -11,7 +11,7 @@
 
 #define MAXBUF  128
 #define MAXOP   10      /* longest mnemonic */
-#define MAXLAB  16
+#define MAXLAB  24
 #define E_LIMIT 32
 #define P_LIMIT 64
 
