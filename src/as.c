@@ -187,7 +187,7 @@ int parse_line(void)
 	register char *ptrto = Label;
 	char	*skip_white(char *);
 
-	if( *ptrfrm == '*' || *ptrfrm == '\n' )
+	if( *ptrfrm == ';' || *ptrfrm == '*' || *ptrfrm == '\n' )
 		return(0);	/* a comment line */
 
 	while( delim(*ptrfrm)== NO )
