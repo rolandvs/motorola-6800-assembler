@@ -3,7 +3,6 @@
 #define _UTIL_H_
 
 void fatal(char *str);
-;
 void error(char *str);
 void errors(char *msg, char *str);
 void warn(char *str);
@@ -24,5 +23,5 @@ int alphan(char c);
 int white(char c);
 char *alloc(int nbytes);
 
-#endif // _UTIL_H_
+#endif /* _UTIL_H_ */
 

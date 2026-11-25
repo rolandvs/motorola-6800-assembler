@@ -67,5 +67,5 @@ extern char    Base_name[];         /* first source file without extension */
 
 FILE *outfile(FILE **fp, char *ext, char *mode);
 
-#endif // _GLOBALS_H_
+#endif /* _GLOBALS_H_ */
 

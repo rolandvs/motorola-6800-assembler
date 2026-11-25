@@ -10,5 +10,5 @@ void fwdreinit(void);
 void fwdmark(void);
 void fwdnext(void);
 
-#endif // _FF2D_H_
+#endif /* _FF2D_H_ */
 
