@@ -103,6 +103,17 @@ done
     "$BIN/as0" t0.asm -now -s1 >/dev/null 2>&1 && ok=0
     if [ $ok = 1 ]; then echo "as0: options ok"; else echo "as0: options FAIL"; fail=1; fi
 }
+# Listing layout: tabs expanded, columns line up (with cycle counts)
+[ "$1" = update ] || {
+    rm -f listing.lst
+    "$BIN/as0" listing.asm -l -c -nos19 >/dev/null 2>&1
+    if cmp -s listing.lst expected/listing.lst; then
+        echo "as0: listing ok"
+    else
+        echo "as0: listing FAIL (diff listing.lst expected/listing.lst)"; fail=1
+    fi
+    rm -f listing.lst
+}
 # Upper case source must give the same code (no strings in these two).
 # Temporary files must not differ from real ones only in case: macOS
 # file systems ignore case, so T9.asm would overwrite t9.asm.
