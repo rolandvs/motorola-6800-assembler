@@ -160,6 +160,10 @@ void do_pseudo(int op /* which op */)
                                 Sflag = 1;
                         else if ( head(Operand,"cre"))
                                 CREflag = 1;
+                        else if ( head(Operand,"w"))
+                                Wflag = 1;
+                        else if ( head(Operand,"now"))
+                                Wflag = 0;
                         else
                                 errors("Unrecognized OPT", Operand);
                         break;

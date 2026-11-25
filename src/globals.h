@@ -49,6 +49,7 @@ extern int     Sflag;              /* symbol table flag, 0=no symbol */
 extern int     N_page;             /* new page flag */
 extern int     Page_num;           /* page number */
 extern int     CREflag;            /* cross reference table flag */
+extern int     Wflag;              /* comment warning flag */
 
 extern struct  nlist *root;            /* root node of the tree */
   

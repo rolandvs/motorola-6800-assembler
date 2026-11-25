@@ -62,6 +62,10 @@ int main(int argc, char *argv[])
 	     Sflag = 1;
 	   else if (strcmp(argv[j],"cre")==0)
 	     CREflag = 1;
+	   else if (strcmp(argv[j],"w")==0)
+	     Wflag = 1;
+	   else if (strcmp(argv[j],"now")==0)
+	     Wflag = 0;
 	    j++;
 	   }
 	  }
@@ -257,6 +261,19 @@ void process(void)
 		if(Cflag)Cycles = i->cycles;
 		do_op(i->opcode,i->class);
 		if(Cflag)Ctotal += Cycles;
+		}
+
+	/* Anything after the operand must be a ';' comment.  Catches
+	   'lda bar - foo' (assembled as 'lda bar').  Option 'now' turns
+	   this off for old sources with bare comments. */
+	if( Wflag && Pass == 2 && *Op != EOS && *Optr != EOS ){
+		if( *Optr == ']' )	/* closing bracket of [ ] operands */
+			Optr++;
+		Optr = skip_white(Optr);
+		if( *Optr != EOS && *Optr != ';' ){
+			warn("Comment does not start with ';'");
+			printf("   %s\n", Optr);
+			}
 		}
 }
 

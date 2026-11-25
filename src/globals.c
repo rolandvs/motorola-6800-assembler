@@ -43,6 +43,7 @@ int     Sflag = 0;              /* symbol table flag, 0=no symbol */
 int     N_page = 0;             /* new page flag */
 int     Page_num = 2;           /* page number */
 int     CREflag = 0;            /* cross reference table flag */
+int     Wflag = 1;              /* warn about comments not starting with ';' */
 
 struct  nlist *root;            /* root node of the tree */
   
