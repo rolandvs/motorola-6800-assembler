@@ -158,7 +158,7 @@ void do_pseudo(int op /* which op */)
                         else if ( head(Operand,"cre"))
                                 CREflag = 1;
                         else
-                                error("Unrecognized OPT");
+                                errors("Unrecognized OPT", Operand);
                         break;
                 case PAGE:                      /* go to a new page */
                         P_force=0;

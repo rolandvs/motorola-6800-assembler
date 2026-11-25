@@ -25,7 +25,20 @@ void error(char *str)
 	if(N_files > 1)
 		printf("%s,",Argv[Cfn]);
 	printf("%d: ",Line_num);
-	printf("%s\n",str);
+	printf("ERROR %s\n",str);
+	Err_count++;
+}
+
+/*
+ *      errors --- error in a line, with the offending text
+ *                      print line number, error and string
+ */
+void errors(char *msg, char *str)
+{
+	if(N_files > 1)
+		printf("%s,",Argv[Cfn]);
+	printf("%d: ",Line_num);
+	printf("ERROR %s\n   %s\n",msg,str);
 	Err_count++;
 }
 
