@@ -196,7 +196,7 @@ int parse_line(void)
 	register char *ptrto = Label;
 	char	*skip_white();
 
-	if( *ptrfrm == '*' || *ptrfrm == EOS )
+	if( *ptrfrm == '*' || *ptrfrm == ';' || *ptrfrm == EOS )
 		return(0);	/* a comment line */
 
 	while( delim(*ptrfrm)== NO ){
@@ -204,8 +204,8 @@ int parse_line(void)
 			*ptrto++ = *ptrfrm;
 		ptrfrm++;
 		}
-	if( ptrto > Label && ptrto[-1] == ':' )  /* allow trailing : */
-		ptrto--;
+	if( *ptrfrm == ':' )	/* allow trailing : */
+		ptrfrm++;
 	*ptrto = EOS;
 
 	ptrfrm = skip_white(ptrfrm);

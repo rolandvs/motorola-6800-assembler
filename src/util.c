@@ -43,10 +43,11 @@ void warn(char *str)
 
 /*
  *      delim --- check if character is a delimiter
+ *      Blank, ':' after a label and the comment sign ';' are delimiters.
  */
 int delim(char c)
 {
-	if( c == EOS || any(c," \t\n\r"))
+	if( c == EOS || any(c," \t\n\r:;"))
 		return(YES);
 	return(NO);
 }

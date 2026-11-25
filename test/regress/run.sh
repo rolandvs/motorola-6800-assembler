@@ -21,6 +21,22 @@ for n in 0 1 4 5 9 11; do
         fail=1
     fi
 done
+# Same source with vdH comment syntax must give the same code:
+# "label:", ";comment" right after the operand, ";" comment lines.
+[ "$1" = update ] || for n in 0 1 4 5 9 11; do
+    sed -e '/^\*/s/^\*/;/' \
+        -e '/^[^*;]/{/;/!s/$/;c/}' \
+        -e 's/^\([A-Za-z_][A-Za-z0-9_]*\)\([ \t]\)/\1:\2/' \
+        "t$n.asm" >"S$n.asm"
+    rm -f "S$n.s19"
+    "$BIN/as$n" "S$n.asm" - s19 >"S$n.out" 2>&1
+    if cmp -s "S$n.s19" "expected/t$n.s19"; then
+        echo "as$n: comment syntax ok"
+    else
+        echo "as$n: comment syntax FAIL"; cat "S$n.out"; fail=1
+    fi
+    rm -f "S$n.asm" "S$n.s19" "S$n.out"
+done
 # Upper case source must give the same code (no strings in these two)
 [ "$1" = update ] || for n in 9 11; do
     tr a-z A-Z <"t$n.asm" >"T$n.asm"
