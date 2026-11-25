@@ -44,9 +44,10 @@ int main(int argc, char *argv[])
 	  N_files = j-1;
 	 if (j < argc )
 	  {
-	  argv[j]++;
 	  while (j<argc)
 	   {
+	   if (*argv[j] == '-')	/* "-l -s" and "-l s" both work */
+	     argv[j]++;
 	   for (i = argv[j]; *i != 0; i++)
 	     if ((*i <= 'Z') && (*i >= 'A'))
 	       *i = *i + 32;
