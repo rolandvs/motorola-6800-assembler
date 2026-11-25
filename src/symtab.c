@@ -100,7 +100,7 @@ struct nlist *lookup(char *name)
           }
       Last_sym = 0;
       if (Pass == 2)
-          error ("symbol Undefined on pass 2");
+          errors("symbol Undefined on pass 2", name);
         return (NULL); 
 }
 

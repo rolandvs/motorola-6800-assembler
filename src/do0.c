@@ -159,6 +159,8 @@ static void do_indexed(int op)
 	eval();
 	if( mapdn(*++Optr) != 'x' )
 		warn("Indexed Addressing Assumed");
+	else
+		Optr++;		/* past the x */
 	if( Result < 0 || Result > 255)
 		warn("Value Truncated");
 	emit(lobyte(Result));

@@ -209,6 +209,7 @@ void do_op(int opcode /* base opcode */, int class /* mnemonic class */)
 					}
 				while(*Optr != EOS && alpha(*Optr))Optr++;
 			}while( *Optr++ == ',' );
+			Optr -= 1;      /* back on the terminator */
 			emit(lobyte(pbyte));
 			return;
 		case P2NOIMM:
@@ -536,6 +537,7 @@ static void abd_index(int pbyte)
 
 	Optr += 2;
 	k=regnum();
+	while( alpha(*Optr) )Optr++;	/* past the index register */
 	pbyte += rtype(k);
 	emit(pbyte);
 	return;
@@ -582,27 +584,16 @@ static int set_mode(void)
 static int regnum(void)
 {
 	if( head(Optr,"D" ))return(RD);
-	if( head(Optr,"d" ))return(RD);
 	if( head(Optr,"X" ))return(RX);
-	if( head(Optr,"x" ))return(RX);
 	if( head(Optr,"Y" ))return(RY);
-	if( head(Optr,"y" ))return(RY);
 	if( head(Optr,"U" ))return(RU);
-	if( head(Optr,"u" ))return(RU);
 	if( head(Optr,"S" ))return(RS);
-	if( head(Optr,"s" ))return(RS);
 	if( head(Optr,"PC" ))return(RPC);
-	if( head(Optr,"pc" ))return(RPC);
 	if( head(Optr,"PCR" ))return(RPCR);
-	if( head(Optr,"pcr" ))return(RPCR);
 	if( head(Optr,"A" ))return(RA);
-	if( head(Optr,"a" ))return(RA);
 	if( head(Optr,"B" ))return(RB);
-	if( head(Optr,"b" ))return(RB);
 	if( head(Optr,"CC" ))return(RCC);
-	if( head(Optr,"cc" ))return(RCC);
 	if( head(Optr,"DP" ))return(RDP);
-	if( head(Optr,"dp" ))return(RDP);
 	return(ERR);
 }
 

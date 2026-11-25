@@ -17,6 +17,8 @@ This module will build the following binaries for the specified Motorola micropr
 ./bin/as11  68HC11 processor
 ```
 
+and the tool `./bin/s19tobin`, which converts an S-record file to a binary memory image (see below).
+
 ## Compiling The Source Code
 
 All you need to do to compile the assemblers is to go to the main directly for this repository and run make as in the example below.
@@ -30,6 +32,11 @@ make as0
 ```
 This will build just the 6800/6802 assembler.
 
+To check that all six assemblers still produce exactly the expected code, run:
+```
+make test
+```
+
 You can enter the following command to remove all derived objects:
 ```
 make clean
@@ -39,16 +46,57 @@ And you can remove all derived objects, binaries, and added directories with the
 make realclean
 ```
 
+## Command Line Options
+
+```
+as0 file1 file2 ... [- option1 option2 ...]
+```
+
+Output files are named after the first source file without its extension, so `prog.asm` gives `prog.lst`, `prog.s19` and so on.  Options are case insensitive and can also be given in the source with `opt`.
+
+```
+l     listing            -> prog.lst      nol   no listing (default)
+s     symbol table       -> prog.sym      c     cycle counts in listing
+cre   cross reference    -> prog.crf      noc   no cycle counts (default)
+s19   S-records (default)-> prog.s19      nos19 no S-records
+bin   raw binary output  -> prog.bin      w     warn about comments without ';' (default)
+                                          now   no comment warnings
+```
+
+Only errors and warnings are written to the terminal.  An unknown option stops the assembler.
+
+Comments start with `*` or `;` at the beginning of a line, or with `;` after the operand.  An operand ends at the first blank, so `ldaa #bar - foo` assembles as `ldaa #bar`; option `w` gives a warning for any text after the operand that does not start with `;`.  For older sources with comments without `;`, such as the examples in ./test, use `now`.
+
+The binary file is a plain dump of the code, starting at its first address, so it is only written if the code is one contiguous block.  If an `org` or an `rmb` between code makes the addresses jump, the assembler reports `ERROR bin is fragmented (code jumps to $xxxx), use s19tobin for a correct bin file` and writes no `.bin` (the `.s19` is still written).
+
+### Making a binary image: s19tobin
+
+To program an EPROM, convert the S-records with s19tobin:
+
+```
+s19tobin [-f XX] [-s START] [-e END] prog.s19 prog.bin
+```
+
+Byte n of prog.bin belongs at address START+n, whatever the order of the `org`s in the source.  Without `-s` and `-e` the image runs from the lowest to the highest address in the file; gaps are filled with `$FF`, or with XX given by `-f`.  Numbers are hex, with or without `$` or `0x`.  For a 2764 EPROM at $E000:
+
+```
+s19tobin -s E000 -e FFFF prog.s19 prog.bin
+```
+
+s19tobin stops with an error, and writes no file, for a bad checksum, an address written twice, or data outside the `-s`/`-e` range.
+
+See [CHANGES.md](CHANGES.md) for the changes made to the original code.
+
 ## Testing Your Binary
 
 I've included a few programs written using the Motorola 6800 syntax.  The programs are examples from the [MEK6802D5 Microcomputer Evaluation Board User's Manual](https://github.com/JimInCA/cassette-tape-emulator/blob/main/doc/mek6802d5.pdf).  The code is almost identical to the code in the book with the exception of the opt pre-assembler directive and the addition of a few comments of mine.  These programs are included in the ./test directory and can be used to verify the functionality of the assembler binaries.  A simple procedure follows that you can use to test the assemblers:
 ```
 cd ./test
-../bin/as0 used5.asm -l cre c s
+../bin/as0 used5.asm -l cre c s now
 ```
-Using the above command, the output to the terminal window from the as0 assembler should look like this:
+The above command writes the listing to used5.lst, the symbol table to used5.sym, the cross reference to used5.crf and the S-records to used5.s19.  Together these files look like this:
 ```
-<system>:~/motorola-6800-assembler/test$ ../bin/as0 used5.asm -l cre c s
+<system>:~/motorola-6800-assembler/test$ cat used5.lst used5.sym used5.crf
 0001                               *
 0002                               *        Copied from:
 0003                               *        MEK6802D5 Microcomputer Evaluation Board User's Manual
@@ -82,13 +130,11 @@ Using the above command, the output to the terminal window from the as0 assemble
 0031 0021 ff e4 19           [ 6 ]         stx     mnptr    establish as active sub of "PUT"
 0032 0024 7e f0 bb           [ 3 ]         jmp     put      call display routine
 0033                                       end
-
 beg        0000
 diddle     f0a2
 disbuf     e41d
 mnptr      e419
 put        f0bb
-
 beg        0000 *0018
 diddle     f0a2 *0014 0030
 disbuf     e41d *0013 0019 0021 0023 0025 0027 0029
@@ -96,7 +142,7 @@ mnptr      e419 *0015 0031
 put        f0bb *0016 0032 
 ```
 
-The as0 assembler produces the S-recored output file used5.s19.  This file is saved to the ./test directory.  A listing of the test directory should look like this:
+Without `now` the assembler also warns about each comment that does not start with `;`.  A listing of the test directory should look like this:
 
 ```
 <system>:~/motorola-6800-assembler/test$ ls -al
@@ -106,18 +152,21 @@ drwxrwxr-x 8 jim jim 4096 May 29 07:53 ..
 -rw-rw-r-- 1 jim jim  657 May 26 18:56 help.asm
 -rw-rw-r-- 1 jim jim  778 May 26 18:56 used5.asm
 -rw-rw-r-- 1 jim jim  109 May 29 07:53 used5.s19
+-rw-rw-r-- 1 jim jim  ... used5.crf
+-rw-rw-r-- 1 jim jim  ... used5.lst
+-rw-rw-r-- 1 jim jim  ... used5.sym
 ```
 
 The first example, used5.asm, was written using only lower case characters and no tabs.  As a further test of the assembler, test case help.asm was written using only upper case characters along with tabs to set the spacing between the label, operator, operand, and comment fields.  You can assemble help.asm with the following command:
 
 ```
-../bin/as0 help.asm -L CRE C S
+../bin/as0 help.asm -L CRE C S NOW
 ```
 
-This will produce the following output to the terminal window along with the help.s19 file being written to the ./test directory:
+This will produce help.lst, help.sym, help.crf and help.s19 in the ./test directory, containing:
 
 ```
-<system>:~/motorola-6800-assembler/test$ ../bin/as0 help.asm -L CRE C S
+<system>:~/motorola-6800-assembler/test$ cat help.lst help.sym help.crf
 0001                               *
 0002                               *	Copied from:
 0003                               *	MEK6802D5 Microcomputer Evaluation Board User's Manual
@@ -147,13 +196,11 @@ This will produce the following output to the terminal window along with the hel
 0027 0012 ce f0 a2           [ 3 ] 	LDX	#DIDDLE		ADDR OF DIDDLE ROUTINE
 0028 0015 ff e4 19           [ 6 ] 	STX	MNPTR		ESTABLISH AS ACTIVE SUB OF PUT
 0029 0018 7e f0 bb           [ 3 ] 	JMP	PUT		CALL DISPLAY ROUTINE
-
 BEG        0000
 DIDDLE     f0a2
 DISBUF     e41d
 MNPTR      e419
 PUT        f0bb
-
 BEG        0000 *0021 
 DIDDLE     f0a2 *0015 0027 
 DISBUF     e41d *0016 0022 0024 0026 
@@ -161,9 +208,13 @@ MNPTR      e419 *0017 0028
 PUT        f0bb *0018 0029 
 ```
 
+## Note on AI Assistance
+
+The changes made after the original fork (see [CHANGES.md](CHANGES.md)) were written with the help of Claude, an AI assistant by Anthropic, and reviewed and tested by the maintainer of this fork.  They are provided as is, without warranty.  Check the code before using it for anything critical.
+
 ## Documentation
 
-I've included two files in the ./documentation directory.  File `assembler.txt` is the original documentation included with the sources for the assemblers.  The other file, `motorola_cross_asm_manual.pdf` is a manual for the Motorola assemblers that was published in 1990.  The information in this second file is not absolutely consistent with the assemblers used here, but it seems to be close and is a much more complete document than the text file.  So use at your own discretion.
+I've included these files in the ./documentation directory.  File `assembler.txt` is the original documentation included with the sources for the assemblers.  The other file, `motorola_cross_asm_manual.pdf` is a manual for the Motorola assemblers that was published in 1990.  The information in this second file is not absolutely consistent with the assemblers used here, but it seems to be close and is a much more complete document than the text file.  So use at your own discretion.  `as9_changes_vanderhorst_2004.txt` describes Albert van der Horst's 2004 changes to as9, which have been carried over to all the assemblers (see CHANGES.md).
 
 That's it for now...
 

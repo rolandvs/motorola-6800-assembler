@@ -49,11 +49,23 @@ extern int     Sflag;              /* symbol table flag, 0=no symbol */
 extern int     N_page;             /* new page flag */
 extern int     Page_num;           /* page number */
 extern int     CREflag;            /* cross reference table flag */
+extern int     Wflag;              /* comment warning flag */
 
 extern struct  nlist *root;            /* root node of the tree */
   
-extern FILE    *Objfil;             /* object file's file descriptor*/
-extern char    Obj_name[];
+extern int     Oflag;              /* write .s19 file */
+extern int     Bflag;              /* write .bin file */
+extern int     Bin_next;           /* next contiguous code address */
+extern int     Bin_gap;            /* first address after a gap, -1 = none */
+
+extern FILE    *Objfil;             /* S19    file (.s19) */
+extern FILE    *Binfil;             /* binary file (.bin) */
+extern FILE    *Lstfil;             /* listing     (.lst) */
+extern FILE    *Symfil;             /* symbols     (.sym) */
+extern FILE    *Crffil;             /* cross ref   (.crf) */
+extern char    Base_name[];         /* first source file without extension */
+
+FILE *outfile(FILE **fp, char *ext, char *mode);
 
 #endif // _GLOBALS_H_
 

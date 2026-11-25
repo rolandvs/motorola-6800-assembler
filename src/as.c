@@ -30,10 +30,12 @@ int main(int argc, char *argv[])
 	int	j = 0;
 
 	if(argc < 2){
-		printf("Usage: %s [files]\n",argv[j]);
+		printf("Usage: %s file... [- option...]\n",argv[j]);
+		printf("options: l nol c noc s cre s19 nos19 bin w now\n");
 		exit(1);
 		}
 	  Argv = argv;
+	  root = NULL;	/* before initialize(): localinit() may install symbols */
 	  initialize();
 	  while ((*argv[j] != '-') && (j<argc))
 	  {
@@ -61,10 +63,24 @@ int main(int argc, char *argv[])
 	     Sflag = 1;
 	   else if (strcmp(argv[j],"cre")==0)
 	     CREflag = 1;
+	   else if (strcmp(argv[j],"w")==0)
+	     Wflag = 1;
+	   else if (strcmp(argv[j],"now")==0)
+	     Wflag = 0;
+	   else if (strcmp(argv[j],"s19")==0)
+	     Oflag = 1;
+	   else if (strcmp(argv[j],"nos19")==0)
+	     Oflag = 0;
+	   else if (strcmp(argv[j],"bin")==0)
+	     Bflag = 1;
+	   else if (*argv[j] != EOS)	/* a lone '-' is allowed */
+	     {
+	     printf("Unknown option: %s\n",argv[j]);
+	     exit(-1);
+	     }
 	    j++;
 	   }
 	  }
-	root = NULL;
 
 	Cfn = 0;
 	np = argv;
@@ -88,25 +104,28 @@ int main(int argc, char *argv[])
 				make_pass();
 				fclose(Fd);
 			     }
-			if (Sflag == 1)
-			  {
-			    printf ("\f");
+			if (Sflag == 1){
+			    outfile(&Symfil,".sym","w");
 			    stable (root);
-			  }
-			if (CREflag == 1)
-			  {
-			    printf ("\f");
+			    }
+			if (CREflag == 1){
+			    outfile(&Crffil,".crf","w");
 			    cross (root);
-			  }
-		fprintf(Objfil,"S9030000FC\n"); /* at least give a decent ending */
+			    }
+		if (Oflag && outfile(&Objfil,".s19","w"))
+			fprintf(Objfil,"S9030000FC\n"); /* at least give a decent ending */
+		if (Bflag && Bin_gap >= 0){
+			printf("ERROR bin is fragmented (code jumps to $%04x), use s19tobin for a correct bin file\n",
+				Bin_gap);
+			Err_count++;
+			}
 		}
 	exit(Err_count);
 }
 
 void initialize(void)
 {
-	FILE	*fopen();
-	int	i = 0;
+	char	*p;
 
 #ifdef DEBUG
 	printf("Initializing\n");
@@ -119,18 +138,19 @@ void initialize(void)
 	Ctotal	  = 0;
 	Sflag	  = 0;
 	CREflag   = 0;
+	Oflag     = 1;	/* S-records by default, as in the original */
+	Bflag     = 0;
 	N_page	  = 0;
-	Line[MAXBUF-1] = NEWLINE;
 
-	strcpy(Obj_name,Argv[1]); /* copy first file name into array */
-	do {
-	    if (Obj_name[i]=='.')
-	       Obj_name[i]=0;
-	}
-	while (Obj_name[i++] != 0);
-	strcat(Obj_name,".s19");  /* append .out to file name. */
-	if( (Objfil = fopen(Obj_name,"w")) == NULL)
-		fatal("Can't create object file");
+	/* Output files are named after the first source file, without
+	   its extension: dir/prog.asm -> dir/prog.lst, dir/prog.s19 ... */
+	if( strlen(Argv[1]) + 5 > MAXPATH )  /* room for ".s19" */
+		fatal("File name too long");
+	strcpy(Base_name,Argv[1]);
+	p = strrchr(Base_name,'.');
+	if( p != NULL && strchr(p,'/') == NULL && strchr(p,'\\') == NULL
+	    && p != Base_name && p[-1] != '/' && p[-1] != '\\' )
+		*p = EOS;	/* a dot in the file name, not in a directory */
 	fwdinit();	/* forward ref init */
 	localinit();	/* target machine specific init. */
 }
@@ -150,13 +170,29 @@ void re_init(void)
 
 void make_pass(void)
 {
-	char	*fgets();
+	size_t	n;
+	int	c;
+	int	toolong;
 
 #ifdef DEBUG
 	printf("Pass %d\n",Pass);
 #endif
-	while( fgets(Line,MAXBUF-1,Fd) != (char *)NULL ){
+	while( fgets(Line,MAXBUF,Fd) != (char *)NULL ){
+		/* strip LF or CR/LF; the last line need not have one */
+		n = strlen(Line);
+		toolong = NO;
+		if( n > 0 && Line[n-1] == NEWLINE )
+			Line[--n] = EOS;
+		else if( (c = getc(Fd)) != EOF && c != NEWLINE ){
+			toolong = YES;	/* longer than MAXBUF-1: drop the rest */
+			while( (c = getc(Fd)) != EOF && c != NEWLINE )
+				;
+			}
+		if( n > 0 && Line[n-1] == '\r' )
+			Line[--n] = EOS;
 		Line_num++;
+		if( toolong )
+			error("Line too long, truncated");
 		P_force = 0;	/* No force unless bytes emitted */
 		N_page = 0;
 		   if(parse_line())
@@ -179,25 +215,32 @@ int parse_line(void)
 	register char *ptrto = Label;
 	char	*skip_white();
 
-	if( *ptrfrm == '*' || *ptrfrm == '\n' )
+	if( *ptrfrm == '*' || *ptrfrm == ';' || *ptrfrm == EOS )
 		return(0);	/* a comment line */
 
-	while( delim(*ptrfrm)== NO )
-		*ptrto++ = *ptrfrm++;
-	if(*--ptrto != ':')ptrto++;     /* allow trailing : */
+	while( delim(*ptrfrm)== NO ){
+		if( ptrto < Label+MAXLAB-1 )
+			*ptrto++ = *ptrfrm;
+		ptrfrm++;
+		}
+	if( *ptrfrm == ':' )	/* allow trailing : */
+		ptrfrm++;
 	*ptrto = EOS;
 
 	ptrfrm = skip_white(ptrfrm);
 
 	ptrto = Op;
-	while( delim(*ptrfrm) == NO)
-		*ptrto++ = mapdn(*ptrfrm++);
+	while( delim(*ptrfrm) == NO){
+		if( ptrto < Op+MAXOP-1 )
+			*ptrto++ = mapdn(*ptrfrm);
+		ptrfrm++;
+		}
 	*ptrto = EOS;
 
 	ptrfrm = skip_white(ptrfrm);
 
 	ptrto = Operand;
-	while( *ptrfrm != NEWLINE )
+	while( *ptrfrm != EOS )
 		*ptrto++ = *ptrfrm++;
 	*ptrto = EOS;
 
@@ -225,7 +268,7 @@ void process(void)
 			install(Label,Pc);
 		}
 	else if( (i = mne_look(Op))== NULL)
-		error("Unrecognized Mnemonic");
+		errors("Unrecognized Mnemonic", Op);
 	else if( i->class == PSEUDO )
 		do_pseudo(i->opcode);
 	else{
@@ -233,6 +276,19 @@ void process(void)
 		if(Cflag)Cycles = i->cycles;
 		do_op(i->opcode,i->class);
 		if(Cflag)Ctotal += Cycles;
+		}
+
+	/* Anything after the operand must be a ';' comment.  Catches
+	   'lda bar - foo' (assembled as 'lda bar').  Option 'now' turns
+	   this off for old sources with bare comments. */
+	if( Wflag && Pass == 2 && *Op != EOS && *Optr != EOS ){
+		if( *Optr == ']' )	/* closing bracket of [ ] operands */
+			Optr++;
+		Optr = skip_white(Optr);
+		if( *Optr != EOS && *Optr != ';' ){
+			warn("Comment does not start with ';'");
+			printf("   %s\n", Optr);
+			}
 		}
 }
 

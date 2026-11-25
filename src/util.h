@@ -5,6 +5,7 @@
 void fatal(char *str);
 ;
 void error(char *str);
+void errors(char *msg, char *str);
 void warn(char *str);
 int delim(char c);
 char *skip_white(char *ptr);

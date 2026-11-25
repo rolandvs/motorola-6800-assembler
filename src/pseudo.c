@@ -99,6 +99,7 @@ void do_pseudo(int op /* which op */)
                                         }
                                 emit(Result);
                         }while( *Optr++ == ',' );
+                        Optr -= 1;      /* back on the terminator */
                         break;
                 case FDB:                       /* form double byte(s) */
                         do{
@@ -106,6 +107,7 @@ void do_pseudo(int op /* which op */)
                                 eval();
                                 eword(Result);
                         }while( *Optr++ == ',' );
+                        Optr -= 1;      /* back on the terminator */
                         break;
                 case FCC:                       /* form constant characters */
                         if(*Operand==EOS)
@@ -140,6 +142,7 @@ void do_pseudo(int op /* which op */)
                         break;
                 case OPT:                       /* assembler option */
                         P_force=0;
+                        Optr += strlen(Optr);   /* free text, no comment check */
                         if( head(Operand,"l") )
                                 Lflag=1;
                         else if( head(Operand,"nol"))
@@ -157,23 +160,36 @@ void do_pseudo(int op /* which op */)
                                 Sflag = 1;
                         else if ( head(Operand,"cre"))
                                 CREflag = 1;
+                        else if ( head(Operand,"s19"))
+                                Oflag = 1;
+                        else if ( head(Operand,"nos19"))
+                                Oflag = 0;
+                        else if ( head(Operand,"bin"))
+                                Bflag = 1;
+                        else if ( head(Operand,"w"))
+                                Wflag = 1;
+                        else if ( head(Operand,"now"))
+                                Wflag = 0;
                         else
-                                error("Unrecognized OPT");
+                                errors("Unrecognized OPT", Operand);
                         break;
                 case PAGE:                      /* go to a new page */
                         P_force=0;
+                        Optr += strlen(Optr);   /* free text, no comment check */
                         N_page = 1;
                         if (Pass == 2 )
                          if (Lflag)  
                           {
-                           printf ("\f");
-                           printf ("%-10s",Argv[Cfn]);
-                           printf ("                                   ");
-                           printf ("page %3d\n",Page_num++);
+                           FILE *f = outfile(&Lstfil,".lst","w");
+                           fprintf (f,"\f");
+                           fprintf (f,"%-10s",Argv[Cfn]);
+                           fprintf (f,"                                   ");
+                           fprintf (f,"page %3d\n",Page_num++);
                           }
                         break;
                 case NULL_OP:                   /* ignored psuedo ops */
                         P_force=0;
+                        Optr += strlen(Optr);   /* nam/ttl/spc/end: free text */
                         break;
                 default:
                         fatal("Pseudo error");

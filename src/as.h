@@ -9,9 +9,10 @@
 #define NO      0
 #define ERR     (-1)
 
-#define MAXBUF  128
+#define MAXBUF  256     /* input line buffer */
 #define MAXOP   10      /* longest mnemonic */
-#define MAXLAB  16
+#define MAXLAB  80      /* longest label */
+#define MAXPATH 256     /* longest file name */
 #define E_LIMIT 32
 #define P_LIMIT 64
 

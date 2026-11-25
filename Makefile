@@ -29,7 +29,7 @@ OBJ       += $(OBJDIR)/globals.o
 DIRS      := $(OBJDIR) $(BINDIR)
 
 .PHONEY: all
-all: directories as0 as1 as4 as5 as9 as11
+all: directories as0 as1 as4 as5 as9 as11 s19tobin
 
 as0: directories $(BINDIR)/$(APP)0
 
@@ -42,6 +42,8 @@ as5: directories $(BINDIR)/$(APP)5
 as9: directories $(BINDIR)/$(APP)9
 
 as11: directories $(BINDIR)/$(APP)11
+
+s19tobin: directories $(BINDIR)/s19tobin
 
 .PHONEY: directories
 directories: $(DIRS)
@@ -79,6 +81,14 @@ $(BINDIR)/$(APP)9: $(OBJ) $(OBJ_as9)
 $(BINDIR)/$(APP)11: $(OBJ) $(OBJ_as11)
 	$(LINKER) $@ $^ $(CFLAGS)
 	@echo "Linking "$@" complete!"
+
+$(BINDIR)/s19tobin: $(OBJDIR)/s19tobin.o
+	$(LINKER) $@ $^ $(CFLAGS)
+	@echo "Linking "$@" complete!"
+
+.PHONEY: test
+test: all
+	@sh $(TESTDIR)/regress/run.sh
 
 .PHONEY: clean
 clean:

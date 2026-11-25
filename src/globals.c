@@ -43,9 +43,19 @@ int     Sflag = 0;              /* symbol table flag, 0=no symbol */
 int     N_page = 0;             /* new page flag */
 int     Page_num = 2;           /* page number */
 int     CREflag = 0;            /* cross reference table flag */
+int     Wflag = 1;              /* warn about comments not starting with ';' */
 
 struct  nlist *root;            /* root node of the tree */
   
-FILE    *Objfil =0;             /* object file's file descriptor*/
-char    Obj_name[] = {"             "};
+int     Oflag = 0;              /* s19 flag     0=no .s19, 1=.s19 */
+int     Bflag = 0;              /* binary flag  0=no .bin, 1=.bin */
+int     Bin_next = -1;          /* address the next code byte should have */
+int     Bin_gap = -1;           /* first address after a gap, -1 = none */
+
+FILE    *Objfil =0;             /* S19    file (.s19) */
+FILE    *Binfil =0;             /* binary file (.bin) */
+FILE    *Lstfil =0;             /* listing     (.lst) */
+FILE    *Symfil =0;             /* symbols     (.sym) */
+FILE    *Crffil =0;             /* cross ref   (.crf) */
+char    Base_name[MAXPATH] = {0};  /* first source file without extension */
 

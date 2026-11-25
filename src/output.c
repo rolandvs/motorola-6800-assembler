@@ -14,7 +14,7 @@ void stable(struct nlist *ptr)
   if (ptr != NULL)
     {
       stable (ptr->Lnext);
-        printf ("%-10s %04x\n",ptr->name,ptr->def);
+        fprintf (outfile(&Symfil,".sym","w"),"%-10s %04x\n",ptr->name,ptr->def);
       stable (ptr->Rnext);
     }
 }
@@ -28,19 +28,19 @@ int i = 1;
   if (point != NULL)
     {
       cross (point->Lnext);
-        printf ("%-10s %04x *",point->name,point->def);
+        fprintf (outfile(&Crffil,".crf","w"),"%-10s %04x *",point->name,point->def);
          tp = point->L_list;
           while (tp != NULL)
            {
              if (i++>10)
               {
                i=1;
-               printf("\n                      ");
+               fprintf(Crffil,"\n                      ");
               }
-              printf ("%04d ",tp->L_num);
+              fprintf (Crffil,"%04d ",tp->L_num);
                tp = tp->next;
            }
-         printf ("\n");
+         fprintf (Crffil,"\n");
       cross (point->Rnext);
     }
 }
