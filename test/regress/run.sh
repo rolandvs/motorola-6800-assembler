@@ -80,7 +80,13 @@ done
     printf 'S10501000102F6\nS1040101AA4F\n' >e1.s19     # $0101 twice
     printf 'S10501000102F7\n' >e2.s19                   # bad checksum
     printf 'hello\n' >e3.s19                            # not an S-record
-    for e in "e1.s19" "e2.s19" "e3.s19" "-s FF10 s19tobin.s19"; do
+    # options anywhere, "-f FF" or "-fFF"; default name prog.s19 -> prog.bin
+    "$S" s19tobin.s19 o.bin -f FF >/dev/null && cmp -s o.bin expected/s19tobin.bin || ok=0
+    "$S" -fFF s19tobin.s19 o.bin >/dev/null && cmp -s o.bin expected/s19tobin.bin || ok=0
+    rm -f o.bin s19tobin.bin
+    "$S" s19tobin.s19 >/dev/null && cmp -s s19tobin.bin expected/s19tobin.bin || ok=0
+    rm -f s19tobin.bin
+    for e in "e1.s19" "e2.s19" "e3.s19" "-s FF10 s19tobin.s19" "-x 1 s19tobin.s19"; do
         "$S" $e o.bin 2>/dev/null && ok=0
         [ -f o.bin ] && ok=0
     done
