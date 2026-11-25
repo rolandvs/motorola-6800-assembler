@@ -9,5 +9,5 @@ int install(char *str, int val);
 struct nlist *lookup(char *name);
 struct oper *mne_look(char *str);
 
-#endif // _SYMTAB_H_
+#endif /* _SYMTAB_H_ */
 

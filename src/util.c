@@ -306,7 +306,6 @@ int white(char c)
  */
 char *alloc(int nbytes)
 {
-	//char *malloc();	// This prototype is not needed.
 
 	return(malloc(nbytes));
 }

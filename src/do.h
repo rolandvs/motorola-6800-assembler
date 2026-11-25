@@ -8,5 +8,5 @@
 void localinit(void);
 void do_op(int opcode /* base opcode */, int class /* mnemonic class */);
 
-#endif // _DO_H_
+#endif /* _DO_H_ */
 

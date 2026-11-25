@@ -79,5 +79,5 @@ struct oper {   /* an entry in the mnemonic table */
         int     opcode;         /* its base opcode */
         char    cycles;         /* its base # of cycles */
 };
-#endif // _AS_H_
+#endif /* _AS_H_ */
 

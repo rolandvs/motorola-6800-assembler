@@ -24,7 +24,7 @@ void fwdinit(void)
 	Forward = creat(Fwd_name,FILEMODE);
 	if(Forward <0)
 		fatal("Can't create temp file");
-	close(Forward); // close and reopen for reads and writes
+	close(Forward);	/* close and reopen for reads and writes */
 	Forward = open(Fwd_name,UPDATE);
 	if(Forward <0)
 		fatal("Forward ref file has gone.");
@@ -40,9 +40,9 @@ void fwdreinit(void)
 {
 	F_ref   = 0;
 	Ffn     = 0;
-	lseek(Forward,0L,ABS);   // rewind forward refs
+	lseek(Forward,0L,ABS);	/* rewind forward refs */
 	read(Forward,&Ffn,sizeof(Ffn));
-	read(Forward,&F_ref,sizeof(F_ref)); // read first forward ref into mem
+	read(Forward,&F_ref,sizeof(F_ref));	/* read first forward ref into mem */
 #ifdef DEBUG
 	printf("First fwd ref: %d,%d\n",Ffn,F_ref);
 #endif

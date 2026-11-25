@@ -2,7 +2,6 @@
  *      pseudo --- pseudo op processing
  */
 
-//#include "pseudo.h"
 #include "symtab.h"
 #include "util.h"
 #include "globals.h"

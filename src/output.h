@@ -11,5 +11,5 @@
 void stable(struct nlist *ptr);
 void cross(struct nlist *point);
 
-#endif // _OUTPUT_H_
+#endif /* _OUTPUT_H_ */
 
