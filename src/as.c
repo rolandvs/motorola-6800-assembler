@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 		exit(1);
 		}
 	  Argv = argv;
+	  root = NULL;	/* before initialize(): localinit() may install symbols */
 	  initialize();
 	  while ((*argv[j] != '-') && (j<argc))
 	  {
@@ -64,7 +65,6 @@ int main(int argc, char *argv[])
 	    j++;
 	   }
 	  }
-	root = NULL;
 
 	Cfn = 0;
 	np = argv;

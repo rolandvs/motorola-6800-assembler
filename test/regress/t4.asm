@@ -9,6 +9,8 @@ start   lda     #$12
         add     #1
         sub     $10
         cmp     [$81]
+        lda     [x]             ; register symbols installed by localinit()
+        sta     [y]
         ldxi    #$90
         ldyi    #$91
         clrx
