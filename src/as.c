@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
 {
 	char	**np;
 	char	*i;
-	FILE	*fopen();
 	int	j = 0;
 
 	if(argc < 2){
@@ -213,7 +212,6 @@ int parse_line(void)
 {
 	register char *ptrfrm = Line;
 	register char *ptrto = Label;
-	char	*skip_white();
 
 	if( *ptrfrm == '*' || *ptrfrm == ';' || *ptrfrm == EOS )
 		return(0);	/* a comment line */
@@ -258,7 +256,6 @@ int parse_line(void)
 void process(void)
 {
 	register struct oper *i;
-	struct oper *mne_look();
 
 	Old_pc = Pc;		/* setup `old' program counter */
 	Optr = Operand; 	/* point to beginning of operand field */
