@@ -1,8 +1,10 @@
 /*
  *      s19tobin --- convert Motorola S-records to a binary memory image
  *
- *      usage: s19tobin [-f XX] [-s START] [-e END] in.s19 out.bin
+ *      usage: s19tobin [-f XX] [-s START] [-e END] in.s19 [out.bin]
  *
+ *      Options may come anywhere, as "-f FF" or "-fFF".  Without out.bin
+ *      the output is named after the input: prog.s19 -> prog.bin.
  *      Byte n of out.bin belongs at address START+n.  Without -s/-e the
  *      image runs from the lowest to the highest address in the file.
  *      Gaps are filled with XX (default FF, an erased EPROM).
@@ -39,7 +41,8 @@ static const char *inname = "";
 static void usage(void)
 {
 	fprintf(stderr,
-	    "usage: s19tobin [-f XX] [-s START] [-e END] in.s19 out.bin\n"
+	    "usage: s19tobin [-f XX] [-s START] [-e END] in.s19 [out.bin]\n"
+	    "  without out.bin: prog.s19 -> prog.bin\n"
 	    "  -f XX     fill byte for gaps (hex, default FF)\n"
 	    "  -s START  first address of the image (default: lowest in file)\n"
 	    "  -e END    last address of the image (default: highest in file)\n");
@@ -162,31 +165,68 @@ int main(int argc, char *argv[])
 	unsigned long start = 0, end = 0, size, a;
 	unsigned char *image, *used;
 	const char *outname;
+	const char *files[2];
+	char    *madename = NULL;     /* default output name, if made */
+	int     nfiles = 0;
 	FILE    *f;
 	int     i, j;
 
-	for(i=1; i<argc && argv[i][0]=='-' && argv[i][1]!='\0'; i++){
-		if( i+1 >= argc )
+	/* options and file names in any order; "-f FF" or "-fFF" */
+	for(i=1; i<argc; i++){
+		const char *arg = argv[i];
+		const char *val;
+		unsigned long v;
+
+		if( arg[0] != '-' || arg[1] == '\0' ){
+			if( nfiles == 2 )
+				usage();
+			files[nfiles++] = arg;
+			continue;
+		}
+		if( strchr("fse",arg[1]) == NULL )
 			usage();
-		if( strcmp(argv[i],"-f") == 0 ){
-			unsigned long v = hexarg(argv[++i]);
+		if( arg[2] != '\0' )
+			val = arg+2;            /* -fFF */
+		else if( i+1 < argc )
+			val = argv[++i];        /* -f FF */
+		else
+			usage();
+		v = hexarg(val);
+		switch(arg[1]){
+		case 'f':
 			if( v > 0xFF )
 				usage();
 			fill = (int)v;
+			break;
+		case 's':
+			start = v; have_s = 1;
+			break;
+		case 'e':
+			end = v; have_e = 1;
+			break;
 		}
-		else if( strcmp(argv[i],"-s") == 0 ){
-			start = hexarg(argv[++i]); have_s = 1;
-		}
-		else if( strcmp(argv[i],"-e") == 0 ){
-			end = hexarg(argv[++i]); have_e = 1;
-		}
-		else
-			usage();
 	}
-	if( argc - i != 2 )
+	if( nfiles == 0 )
 		usage();
-	inname  = argv[i];
-	outname = argv[i+1];
+	inname  = files[0];
+	if( nfiles == 2 )
+		outname = files[1];
+	else{                           /* prog.s19 -> prog.bin */
+		const char *slash = strrchr(inname,'/');
+		const char *dot   = strrchr(inname,'.');
+		size_t  len = strlen(inname);
+		char    *name;
+
+		if( dot != NULL && (slash == NULL || dot > slash+1) )
+			len = (size_t)(dot - inname);
+		if( (name = malloc(len+5)) == NULL )
+			die(0,"out of memory",0);
+		memcpy(name,inname,len);
+		strcpy(name+len,".bin");
+		if( strcmp(name,inname) == 0 )
+			die(0,"input is already called .bin; give an output name",0);
+		outname = madename = name;
+	}
 
 	if( (f = fopen(inname,"r")) == NULL ){
 		perror(inname);
@@ -250,5 +290,6 @@ int main(int argc, char *argv[])
 	free(image);
 	free(used);
 	free(recs);
+	free(madename);
 	return 0;
 }

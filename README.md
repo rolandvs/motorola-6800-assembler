@@ -52,7 +52,7 @@ make realclean
 as0 file1 file2 ... [- option1 option2 ...]
 ```
 
-Output files are named after the first source file without its extension, so `prog.asm` gives `prog.lst`, `prog.s19` and so on.  Options are case insensitive and can also be given in the source with `opt`.
+Output files are named after the first source file without its extension, so `prog.asm` gives `prog.lst`, `prog.s19` and so on.  Options are case insensitive and can also be given in the source with `opt`.  Each option may start with a minus sign, so `as0 prog.asm -l -s`, `as0 prog.asm -l s` and `as0 prog.asm - l s` are the same.
 
 ```
 l     listing            -> prog.lst      nol   no listing (default)
@@ -74,8 +74,10 @@ The binary file is a plain dump of the code, starting at its first address, so i
 To program an EPROM, convert the S-records with s19tobin:
 
 ```
-s19tobin [-f XX] [-s START] [-e END] prog.s19 prog.bin
+s19tobin [-f XX] [-s START] [-e END] prog.s19 [prog.bin]
 ```
+
+Without an output name, prog.s19 gives prog.bin.  The options may come anywhere, as `-f FF` or `-fFF`.
 
 Byte n of prog.bin belongs at address START+n, whatever the order of the `org`s in the source.  Without `-s` and `-e` the image runs from the lowest to the highest address in the file; gaps are filled with `$FF`, or with XX given by `-f`.  Numbers are hex, with or without `$` or `0x`.  For a 2764 EPROM at $E000:
 
