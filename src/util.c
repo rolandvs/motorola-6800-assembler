@@ -208,12 +208,12 @@ int hibyte(int i)
 }
 
 /*
- *      head --- is str2 the head of str1?
+ *      head --- is str2 the head of str1?  (case insensitive)
  */
 int head(char *str1, char *str2)
 {
 	while( *str1 != EOS && *str2 != EOS){
-		if( *str1 != *str2 )break;
+		if( mapdn(*str1) != mapdn(*str2) )break;
 		str1++;
 		str2++;
 		}
