@@ -55,6 +55,8 @@ extern struct  nlist *root;            /* root node of the tree */
   
 extern int     Oflag;              /* write .s19 file */
 extern int     Bflag;              /* write .bin file */
+extern int     Bin_next;           /* next contiguous code address */
+extern int     Bin_gap;            /* first address after a gap, -1 = none */
 
 extern FILE    *Objfil;             /* S19    file (.s19) */
 extern FILE    *Binfil;             /* binary file (.bin) */

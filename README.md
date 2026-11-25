@@ -56,15 +56,16 @@ Output files are named after the first source file without its extension, so `pr
 l     listing            -> prog.lst      nol   no listing (default)
 s     symbol table       -> prog.sym      c     cycle counts in listing
 cre   cross reference    -> prog.crf      noc   no cycle counts (default)
-s19   S-record output    -> prog.s19      w     warn about comments without ';' (default)
-bin   raw binary output  -> prog.bin      now   no comment warnings
+s19   S-records (default)-> prog.s19      nos19 no S-records
+bin   raw binary output  -> prog.bin      w     warn about comments without ';' (default)
+                                          now   no comment warnings
 ```
 
 Only errors and warnings are written to the terminal.  An unknown option stops the assembler.
 
 Comments start with `*` or `;` at the beginning of a line, or with `;` after the operand.  An operand ends at the first blank, so `ldaa #bar - foo` assembles as `ldaa #bar`; option `w` gives a warning for any text after the operand that does not start with `;`.  For older sources with comments without `;`, such as the examples in ./test, use `now`.
 
-The binary file holds the bytes in the order they are generated; gaps left by `org` or `rmb` are not filled.
+The binary file is a plain dump of the code, starting at its first address, so it is only written if the code is one contiguous block.  If an `org` or an `rmb` between code makes the addresses jump, the assembler reports `ERROR bin is fragmented (code jumps to $xxxx), use s19tobin for a correct bin file` and writes no `.bin` (the `.s19` is still written).
 
 See [CHANGES.md](CHANGES.md) for the changes made to the original code.
 
@@ -73,7 +74,7 @@ See [CHANGES.md](CHANGES.md) for the changes made to the original code.
 I've included a few programs written using the Motorola 6800 syntax.  The programs are examples from the [MEK6802D5 Microcomputer Evaluation Board User's Manual](https://github.com/JimInCA/cassette-tape-emulator/blob/main/doc/mek6802d5.pdf).  The code is almost identical to the code in the book with the exception of the opt pre-assembler directive and the addition of a few comments of mine.  These programs are included in the ./test directory and can be used to verify the functionality of the assembler binaries.  A simple procedure follows that you can use to test the assemblers:
 ```
 cd ./test
-../bin/as0 used5.asm -l cre c s s19 now
+../bin/as0 used5.asm -l cre c s now
 ```
 The above command writes the listing to used5.lst, the symbol table to used5.sym, the cross reference to used5.crf and the S-records to used5.s19.  Together these files look like this:
 ```
@@ -141,7 +142,7 @@ drwxrwxr-x 8 jim jim 4096 May 29 07:53 ..
 The first example, used5.asm, was written using only lower case characters and no tabs.  As a further test of the assembler, test case help.asm was written using only upper case characters along with tabs to set the spacing between the label, operator, operand, and comment fields.  You can assemble help.asm with the following command:
 
 ```
-../bin/as0 help.asm -L CRE C S S19 NOW
+../bin/as0 help.asm -L CRE C S NOW
 ```
 
 This will produce help.lst, help.sym, help.crf and help.s19 in the ./test directory, containing:

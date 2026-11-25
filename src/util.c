@@ -93,6 +93,11 @@ int emit(int byte)
 	printf("%2x @ %4x\n",byte,Pc);
 #endif
 	if(Pass==1){
+		/* A .bin file can only be a plain dump if the code is one
+		   contiguous block; note the first jump (ORG, RMB). */
+		if( Bin_next >= 0 && Pc != Bin_next && Bin_gap < 0 )
+			Bin_gap = Pc;
+		Bin_next = Pc+1;
 		Pc++;
 		return(YES);
 		}
@@ -140,7 +145,7 @@ void f_record(void)
 		E_pc = Pc;
 		return;
 		}
-	if( Bflag ){            /* raw bytes, in the order emitted */
+	if( Bflag && Bin_gap < 0 ){     /* one block: dump the bytes */
 		outfile(&Binfil,".bin","wb");
 		for(i=0;i<E_total;i++)
 			putc(lobyte(E_bytes[i]),Binfil);

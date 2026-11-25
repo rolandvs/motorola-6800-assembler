@@ -51,6 +51,22 @@ done
     fi
     rm -f warn.s19
 }
+# .bin: a plain dump of one contiguous block; error if fragmented
+[ "$1" = update ] || {
+    printf ' org $100\n lda #1\n fcb 2,3\nbuf rmb 4\n' >frag1.asm
+    printf ' org $100\n fcb 1\n rmb 2\n fcb 2\n' >frag2.asm
+    rm -f frag1.bin frag2.bin frag2.s19
+    "$BIN/as9" frag1.asm - bin nos19 >frag1.out 2>&1; r1=$?
+    "$BIN/as9" frag2.asm - bin >frag2.out 2>&1; r2=$?
+    if [ $r1 = 0 ] && [ ! -s frag1.out ] && [ "$(od -An -tx1 frag1.bin | tr -d ' ')" = 86010203 ] \
+       && [ ! -f frag1.s19 ] && [ $r2 != 0 ] && [ ! -f frag2.bin ] && [ -f frag2.s19 ] \
+       && grep -q 'bin is fragmented (code jumps to \$0103), use s19tobin' frag2.out; then
+        echo "as9: bin ok"
+    else
+        echo "as9: bin FAIL"; cat frag1.out frag2.out; fail=1
+    fi
+    rm -f frag1.* frag2.*
+}
 # Upper case source must give the same code (no strings in these two)
 [ "$1" = update ] || for n in 9 11; do
     tr a-z A-Z <"t$n.asm" >"T$n.asm"

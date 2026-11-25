@@ -162,6 +162,8 @@ void do_pseudo(int op /* which op */)
                                 CREflag = 1;
                         else if ( head(Operand,"s19"))
                                 Oflag = 1;
+                        else if ( head(Operand,"nos19"))
+                                Oflag = 0;
                         else if ( head(Operand,"bin"))
                                 Bflag = 1;
                         else if ( head(Operand,"w"))

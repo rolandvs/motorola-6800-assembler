@@ -49,6 +49,8 @@ struct  nlist *root;            /* root node of the tree */
   
 int     Oflag = 0;              /* s19 flag     0=no .s19, 1=.s19 */
 int     Bflag = 0;              /* binary flag  0=no .bin, 1=.bin */
+int     Bin_next = -1;          /* address the next code byte should have */
+int     Bin_gap = -1;           /* first address after a gap, -1 = none */
 
 FILE    *Objfil =0;             /* S19    file (.s19) */
 FILE    *Binfil =0;             /* binary file (.bin) */

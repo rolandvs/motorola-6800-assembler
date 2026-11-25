@@ -25,9 +25,20 @@ Each item is a separate git commit.
   text after the operand that does not start with `;` is reported. It
   catches `ldaa #bar - foo`, which assembles as `ldaa #bar`.
 - **Output files:** listing, symbol table and cross reference go to
-  `.lst`, `.sym` and `.crf` instead of the terminal. S-records
-  (`.s19`) are written only with option `s19`; new option `bin` writes
-  a raw binary file.
+  `.lst`, `.sym` and `.crf` instead of the terminal. New option `bin`
+  writes a raw binary file.
+
+## Beyond van der Horst's version
+
+- **S-records stay the default**, as in the original Motorola code (in
+  van der Horst's version `.s19` was only written with option `s19`).
+  `nos19` turns them off.
+- **No fragmented `.bin`.** van der Horst's binary file was the bytes
+  run together, so after an `org` or `rmb` jump no byte was at a known
+  address. The `.bin` is now only written if the code is one
+  contiguous block; otherwise the assembler reports
+  `ERROR bin is fragmented (code jumps to $xxxx), use s19tobin for a
+  correct bin file`. The `.s19` is still written.
 - **Unknown options** stop the assembler instead of being ignored. The
   documented form `as5 prog - l cre` (lone minus) still works.
 

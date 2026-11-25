@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
 	if(argc < 2){
 		printf("Usage: %s file... [- option...]\n",argv[j]);
-		printf("options: l nol c noc s cre s19 bin w now\n");
+		printf("options: l nol c noc s cre s19 nos19 bin w now\n");
 		exit(1);
 		}
 	  Argv = argv;
@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
 	     Wflag = 0;
 	   else if (strcmp(argv[j],"s19")==0)
 	     Oflag = 1;
+	   else if (strcmp(argv[j],"nos19")==0)
+	     Oflag = 0;
 	   else if (strcmp(argv[j],"bin")==0)
 	     Bflag = 1;
 	   else if (*argv[j] != EOS)	/* a lone '-' is allowed */
@@ -112,6 +114,11 @@ int main(int argc, char *argv[])
 			    }
 		if (Oflag && outfile(&Objfil,".s19","w"))
 			fprintf(Objfil,"S9030000FC\n"); /* at least give a decent ending */
+		if (Bflag && Bin_gap >= 0){
+			printf("ERROR bin is fragmented (code jumps to $%04x), use s19tobin for a correct bin file\n",
+				Bin_gap);
+			Err_count++;
+			}
 		}
 	exit(Err_count);
 }
@@ -131,7 +138,7 @@ void initialize(void)
 	Ctotal	  = 0;
 	Sflag	  = 0;
 	CREflag   = 0;
-	Oflag     = 0;
+	Oflag     = 1;	/* S-records by default, as in the original */
 	Bflag     = 0;
 	N_page	  = 0;
 
