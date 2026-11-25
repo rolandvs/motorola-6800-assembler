@@ -80,6 +80,10 @@ $(BINDIR)/$(APP)11: $(OBJ) $(OBJ_as11)
 	$(LINKER) $@ $^ $(CFLAGS)
 	@echo "Linking "$@" complete!"
 
+.PHONEY: test
+test: all
+	@sh $(TESTDIR)/regress/run.sh
+
 .PHONEY: clean
 clean:
 	$(RM) $(OBJDIR)/*.o

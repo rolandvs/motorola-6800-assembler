@@ -1,3 +1,9 @@
 /obj
 /bin
 *.s19
+/test/regress/*.out
+/test/regress/*.lst
+/test/regress/*.sym
+/test/regress/*.crf
+/test/regress/*.bin
+!/test/regress/expected/*.s19
