@@ -28,7 +28,7 @@ done
 # "label:", ";comment" right after the operand, ";" comment lines.
 [ "$1" = update ] || for n in 0 1 4 5 9 11; do
     sed -e '/^\*/s/^\*/;/' \
-        -e '/^[^*;]/{/;/!s/$/;c/}' \
+        -e '/^[^*;]/{' -e '/;/!s/$/;c/' -e '}' \
         -e 's/^\([A-Za-z_][A-Za-z0-9_]*\)\([ \t]\)/\1:\2/' \
         "t$n.asm" >"S$n.asm"
     rm -f "S$n.s19"
