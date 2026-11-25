@@ -187,6 +187,8 @@ void hexout(int byte)
 void print_line(void)
 {
 	int     i;
+	int     col;
+	char    *ptr;
 	FILE    *f = outfile(&Lstfil,".lst","w");
 
 	fprintf(f,"%04d ",Line_num);
@@ -207,7 +209,21 @@ void print_line(void)
 		else
 			fprintf(f,"      ");
 		}
-	fputs(Line,f);          /* just echo the line back out */
+	/* Echo the source line with its tabs expanded, counted from the
+	   start of the source text: the listing prefix is 29 characters,
+	   so tabs copied as they are would not line up. */
+	for(col=0, ptr=Line; *ptr != EOS; ptr++){
+		if( *ptr == TAB ){
+			do{
+				putc(' ',f);
+				col++;
+			}while( col % TABSTOP != 0 );
+		}
+		else{
+			putc(*ptr,f);
+			col++;
+		}
+	}
 	for(;i<P_total;i++){
 		if( i%6 == 0 )
 			fprintf(f,"\n    ");

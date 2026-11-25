@@ -13,6 +13,7 @@
 #define MAXOP   10      /* longest mnemonic */
 #define MAXLAB  80      /* longest label */
 #define MAXPATH 256     /* longest file name */
+#define TABSTOP 8       /* source tab width, for the listing */
 #define E_LIMIT 32
 #define P_LIMIT 64
 

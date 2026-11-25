@@ -1,0 +1,14 @@
+0001                               * listing test: tabs in the source must line up in the .lst
+0002                                       NAM     LISTTEST
+0003 fd00                          PORT    EQU     $FD00
+0004 f800                                  ORG     $F800
+0005 f800 86 41              [ 2 ] start   LDAA    #$41    ; tab before comment
+0006 f802 b7 fd 00           [ 5 ] lp      STAA    PORT
+0007 f805 20 fb              [ 4 ]         BRA     lp
+0008                               ;
+0009 f807 61 20 6c 6f 6e 67        msg     fcc     /a long string, two lines/
+     20 73 74 72 69 6e
+     67 2c 20 74 77 6f
+     20 6c 69 6e 65 73
+0010 f81f 86 01              [ 2 ] x  ldaa  #1  ; spaces, not tabs
+0011                                       END
