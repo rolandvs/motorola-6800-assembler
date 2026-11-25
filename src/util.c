@@ -106,7 +106,28 @@ int emit(int byte)
 }
 
 /*
- *      f_record --- flush record out in `S1' format
+ *      outfile --- the output file *fp, opened on first use as
+ *                  Base_name + ext.  Opening it only when something is
+ *                  written also covers options switched on by OPT in
+ *                  the middle of pass 2.
+ */
+FILE *outfile(FILE **fp, char *ext, char *mode)
+{
+	char    name[MAXPATH+8];
+
+	if( *fp == NULL ){
+		strcpy(name,Base_name);
+		strcat(name,ext);
+		if( (*fp = fopen(name,mode)) == NULL ){
+			printf("Can't create %s\n",name);
+			exit(-1);
+			}
+		}
+	return(*fp);
+}
+
+/*
+ *      f_record --- flush record out to the .s19 and .bin files
  */
 void f_record(void)
 {
@@ -119,20 +140,28 @@ void f_record(void)
 		E_pc = Pc;
 		return;
 		}
-	chksum =  E_total+3;    /* total bytes in this record */
-	chksum += lobyte(E_pc);
-	chksum += E_pc>>8;
-	fprintf(Objfil,"S1");   /* record header preamble */
-	hexout(E_total+3);      /* byte count +3 */
-	hexout(E_pc>>8);        /* high byte of PC */
-	hexout(lobyte(E_pc));	/* low byte of PC */
-	for(i=0;i<E_total;i++){
-		chksum += lobyte(E_bytes[i]);
-		hexout(lobyte(E_bytes[i]));	/* data byte */
+	if( Bflag ){            /* raw bytes, in the order emitted */
+		outfile(&Binfil,".bin","wb");
+		for(i=0;i<E_total;i++)
+			putc(lobyte(E_bytes[i]),Binfil);
 		}
-	chksum =~ chksum;       /* one's complement */
-	hexout(lobyte(chksum));	/* checksum */
-	fprintf(Objfil,"\n");
+	if( Oflag ){
+		outfile(&Objfil,".s19","w");
+		chksum =  E_total+3;    /* total bytes in this record */
+		chksum += lobyte(E_pc);
+		chksum += E_pc>>8;
+		fprintf(Objfil,"S1");   /* record header preamble */
+		hexout(E_total+3);      /* byte count +3 */
+		hexout(E_pc>>8);        /* high byte of PC */
+		hexout(lobyte(E_pc));	/* low byte of PC */
+		for(i=0;i<E_total;i++){
+			chksum += lobyte(E_bytes[i]);
+			hexout(lobyte(E_bytes[i]));	/* data byte */
+			}
+		chksum =~ chksum;       /* one's complement */
+		hexout(lobyte(chksum));	/* checksum */
+		fprintf(Objfil,"\n");
+		}
 	E_pc = Pc;
 	E_total = 0;
 }
@@ -148,40 +177,38 @@ void hexout(int byte)
 }
 
 /*
- *      print_line --- pretty print input line
+ *      print_line --- pretty print input line to the .lst file
  */
 void print_line(void)
 {
 	int     i;
-	register char *ptr;
+	FILE    *f = outfile(&Lstfil,".lst","w");
 
-        printf ("%04d ",Line_num);
+	fprintf(f,"%04d ",Line_num);
 	if(P_total || P_force)
-		printf("%04x",Old_pc);
+		fprintf(f,"%04x",Old_pc);
 	else
-		printf("    ");
+		fprintf(f,"    ");
 
 	for(i=0;i<P_total && i<6;i++)
-		printf(" %02x",lobyte(P_bytes[i]));
+		fprintf(f," %02x",lobyte(P_bytes[i]));
 	for(;i<6;i++)
-		printf("   ");
-	printf("  ");
+		fprintf(f,"   ");
+	fprintf(f,"  ");
 
 	if(Cflag){
 		if(Cycles)
-			printf("[%2d ] ",Cycles);
+			fprintf(f,"[%2d ] ",Cycles);
 		else
-			printf("      ");
+			fprintf(f,"      ");
 		}
-	ptr = Line;
-	while( *ptr != EOS )    /* just echo the line back out */
-		putchar(*ptr++);
+	fputs(Line,f);          /* just echo the line back out */
 	for(;i<P_total;i++){
 		if( i%6 == 0 )
-			printf("\n    ");
-		printf(" %02x",lobyte(P_bytes[i]));
+			fprintf(f,"\n    ");
+		fprintf(f," %02x",lobyte(P_bytes[i]));
 		}
-	printf("\n");
+	fprintf(f,"\n");
 }
 
 /*

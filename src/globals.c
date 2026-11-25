@@ -47,6 +47,13 @@ int     Wflag = 1;              /* warn about comments not starting with ';' */
 
 struct  nlist *root;            /* root node of the tree */
   
-FILE    *Objfil =0;             /* object file's file descriptor*/
-char    Obj_name[MAXPATH] = {0};
+int     Oflag = 0;              /* s19 flag     0=no .s19, 1=.s19 */
+int     Bflag = 0;              /* binary flag  0=no .bin, 1=.bin */
+
+FILE    *Objfil =0;             /* S19    file (.s19) */
+FILE    *Binfil =0;             /* binary file (.bin) */
+FILE    *Lstfil =0;             /* listing     (.lst) */
+FILE    *Symfil =0;             /* symbols     (.sym) */
+FILE    *Crffil =0;             /* cross ref   (.crf) */
+char    Base_name[MAXPATH] = {0};  /* first source file without extension */
 

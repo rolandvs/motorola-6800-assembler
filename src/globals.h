@@ -53,8 +53,17 @@ extern int     Wflag;              /* comment warning flag */
 
 extern struct  nlist *root;            /* root node of the tree */
   
-extern FILE    *Objfil;             /* object file's file descriptor*/
-extern char    Obj_name[];
+extern int     Oflag;              /* write .s19 file */
+extern int     Bflag;              /* write .bin file */
+
+extern FILE    *Objfil;             /* S19    file (.s19) */
+extern FILE    *Binfil;             /* binary file (.bin) */
+extern FILE    *Lstfil;             /* listing     (.lst) */
+extern FILE    *Symfil;             /* symbols     (.sym) */
+extern FILE    *Crffil;             /* cross ref   (.crf) */
+extern char    Base_name[];         /* first source file without extension */
+
+FILE *outfile(FILE **fp, char *ext, char *mode);
 
 #endif // _GLOBALS_H_
 

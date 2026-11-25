@@ -160,6 +160,10 @@ void do_pseudo(int op /* which op */)
                                 Sflag = 1;
                         else if ( head(Operand,"cre"))
                                 CREflag = 1;
+                        else if ( head(Operand,"s19"))
+                                Oflag = 1;
+                        else if ( head(Operand,"bin"))
+                                Bflag = 1;
                         else if ( head(Operand,"w"))
                                 Wflag = 1;
                         else if ( head(Operand,"now"))
@@ -174,10 +178,11 @@ void do_pseudo(int op /* which op */)
                         if (Pass == 2 )
                          if (Lflag)  
                           {
-                           printf ("\f");
-                           printf ("%-10s",Argv[Cfn]);
-                           printf ("                                   ");
-                           printf ("page %3d\n",Page_num++);
+                           FILE *f = outfile(&Lstfil,".lst","w");
+                           fprintf (f,"\f");
+                           fprintf (f,"%-10s",Argv[Cfn]);
+                           fprintf (f,"                                   ");
+                           fprintf (f,"page %3d\n",Page_num++);
                           }
                         break;
                 case NULL_OP:                   /* ignored psuedo ops */

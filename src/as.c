@@ -66,6 +66,10 @@ int main(int argc, char *argv[])
 	     Wflag = 1;
 	   else if (strcmp(argv[j],"now")==0)
 	     Wflag = 0;
+	   else if (strcmp(argv[j],"s19")==0)
+	     Oflag = 1;
+	   else if (strcmp(argv[j],"bin")==0)
+	     Bflag = 1;
 	    j++;
 	   }
 	  }
@@ -92,25 +96,23 @@ int main(int argc, char *argv[])
 				make_pass();
 				fclose(Fd);
 			     }
-			if (Sflag == 1)
-			  {
-			    printf ("\f");
+			if (Sflag == 1){
+			    outfile(&Symfil,".sym","w");
 			    stable (root);
-			  }
-			if (CREflag == 1)
-			  {
-			    printf ("\f");
+			    }
+			if (CREflag == 1){
+			    outfile(&Crffil,".crf","w");
 			    cross (root);
-			  }
-		fprintf(Objfil,"S9030000FC\n"); /* at least give a decent ending */
+			    }
+		if (Oflag && outfile(&Objfil,".s19","w"))
+			fprintf(Objfil,"S9030000FC\n"); /* at least give a decent ending */
 		}
 	exit(Err_count);
 }
 
 void initialize(void)
 {
-	FILE	*fopen();
-	int	i = 0;
+	char	*p;
 
 #ifdef DEBUG
 	printf("Initializing\n");
@@ -123,19 +125,19 @@ void initialize(void)
 	Ctotal	  = 0;
 	Sflag	  = 0;
 	CREflag   = 0;
+	Oflag     = 0;
+	Bflag     = 0;
 	N_page	  = 0;
 
+	/* Output files are named after the first source file, without
+	   its extension: dir/prog.asm -> dir/prog.lst, dir/prog.s19 ... */
 	if( strlen(Argv[1]) + 5 > MAXPATH )  /* room for ".s19" */
 		fatal("File name too long");
-	strcpy(Obj_name,Argv[1]); /* copy first file name into array */
-	do {
-	    if (Obj_name[i]=='.')
-	       Obj_name[i]=0;
-	}
-	while (Obj_name[i++] != 0);
-	strcat(Obj_name,".s19");  /* append .out to file name. */
-	if( (Objfil = fopen(Obj_name,"w")) == NULL)
-		fatal("Can't create object file");
+	strcpy(Base_name,Argv[1]);
+	p = strrchr(Base_name,'.');
+	if( p != NULL && strchr(p,'/') == NULL && strchr(p,'\\') == NULL
+	    && p != Base_name && p[-1] != '/' && p[-1] != '\\' )
+		*p = EOS;	/* a dot in the file name, not in a directory */
 	fwdinit();	/* forward ref init */
 	localinit();	/* target machine specific init. */
 }
