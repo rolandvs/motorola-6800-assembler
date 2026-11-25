@@ -30,15 +30,15 @@ done
     sed -e '/^\*/s/^\*/;/' \
         -e '/^[^*;]/{' -e '/;/!s/$/;c/' -e '}' \
         -e 's/^\([A-Za-z_][A-Za-z0-9_]*\)\([ \t]\)/\1:\2/' \
-        "t$n.asm" >"S$n.asm"
-    rm -f "S$n.s19"
-    "$BIN/as$n" "S$n.asm" - s19 >"S$n.out" 2>&1
-    if cmp -s "S$n.s19" "expected/t$n.s19" && ! grep -q Warning "S$n.out"; then
+        "t$n.asm" >"syntax$n.asm"
+    rm -f "syntax$n.s19"
+    "$BIN/as$n" "syntax$n.asm" - s19 >"syntax$n.out" 2>&1
+    if cmp -s "syntax$n.s19" "expected/t$n.s19" && ! grep -q Warning "syntax$n.out"; then
         echo "as$n: comment syntax ok"
     else
-        echo "as$n: comment syntax FAIL"; cat "S$n.out"; fail=1
+        echo "as$n: comment syntax FAIL"; cat "syntax$n.out"; fail=1
     fi
-    rm -f "S$n.asm" "S$n.s19" "S$n.out"
+    rm -f "syntax$n.asm" "syntax$n.s19" "syntax$n.out"
 done
 # Comment warning: exactly lines 4 6 7 9 of warn.asm, none with 'now'
 [ "$1" = update ] || {
@@ -87,16 +87,18 @@ done
     if [ $ok = 1 ]; then echo "s19tobin: ok"; else echo "s19tobin: FAIL"; fail=1; fi
     rm -f o.bin e1.s19 e2.s19 e3.s19 s19tobin.s19
 }
-# Upper case source must give the same code (no strings in these two)
+# Upper case source must give the same code (no strings in these two).
+# Temporary files must not differ from real ones only in case: macOS
+# file systems ignore case, so T9.asm would overwrite t9.asm.
 [ "$1" = update ] || for n in 9 11; do
-    tr a-z A-Z <"t$n.asm" >"T$n.asm"
-    rm -f "T$n.s19"
-    "$BIN/as$n" "T$n.asm" - s19 >"T$n.out" 2>&1
-    if cmp -s "T$n.s19" "expected/t$n.s19"; then
+    tr a-z A-Z <"t$n.asm" >"upper$n.asm"
+    rm -f "upper$n.s19"
+    "$BIN/as$n" "upper$n.asm" - s19 >"upper$n.out" 2>&1
+    if cmp -s "upper$n.s19" "expected/t$n.s19"; then
         echo "as$n: upper case ok"
     else
-        echo "as$n: upper case FAIL"; cat "T$n.out"; fail=1
+        echo "as$n: upper case FAIL"; cat "upper$n.out"; fail=1
     fi
-    rm -f "T$n.asm" "T$n.s19" "T$n.out"
+    rm -f "upper$n.asm" "upper$n.s19" "upper$n.out"
 done
 exit $fail
