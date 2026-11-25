@@ -46,7 +46,7 @@ void warn(char *str)
  */
 int delim(char c)
 {
-	if( any(c," \t\n"))
+	if( c == EOS || any(c," \t\n\r"))
 		return(YES);
 	return(NO);
 }
@@ -56,7 +56,7 @@ int delim(char c)
  */
 char *skip_white(char *ptr)
 {
-	while(*ptr==BLANK || *ptr==TAB)
+	while(*ptr==BLANK || *ptr==TAB || *ptr=='\r')
 		ptr++;
 	return(ptr);
 }
@@ -160,7 +160,7 @@ void print_line(void)
 			printf("      ");
 		}
 	ptr = Line;
-	while( *ptr != '\n' )   /* just echo the line back out */
+	while( *ptr != EOS )    /* just echo the line back out */
 		putchar(*ptr++);
 	for(;i<P_total;i++){
 		if( i%6 == 0 )
@@ -251,7 +251,7 @@ int alphan(char c)
  */
 int white(char c)
 {
-	if( c == TAB || c == BLANK || c == '\n' )return(YES);
+	if( c == TAB || c == BLANK || c == '\n' || c == '\r' )return(YES);
 	return(NO);
 }
 

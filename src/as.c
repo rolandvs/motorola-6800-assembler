@@ -120,7 +120,6 @@ void initialize(void)
 	Sflag	  = 0;
 	CREflag   = 0;
 	N_page	  = 0;
-	Line[MAXBUF-1] = NEWLINE;
 
 	if( strlen(Argv[1]) + 5 > MAXPATH )  /* room for ".s19" */
 		fatal("File name too long");
@@ -152,13 +151,29 @@ void re_init(void)
 
 void make_pass(void)
 {
-	char	*fgets();
+	size_t	n;
+	int	c;
+	int	toolong;
 
 #ifdef DEBUG
 	printf("Pass %d\n",Pass);
 #endif
-	while( fgets(Line,MAXBUF-1,Fd) != (char *)NULL ){
+	while( fgets(Line,MAXBUF,Fd) != (char *)NULL ){
+		/* strip LF or CR/LF; the last line need not have one */
+		n = strlen(Line);
+		toolong = NO;
+		if( n > 0 && Line[n-1] == NEWLINE )
+			Line[--n] = EOS;
+		else if( (c = getc(Fd)) != EOF && c != NEWLINE ){
+			toolong = YES;	/* longer than MAXBUF-1: drop the rest */
+			while( (c = getc(Fd)) != EOF && c != NEWLINE )
+				;
+			}
+		if( n > 0 && Line[n-1] == '\r' )
+			Line[--n] = EOS;
 		Line_num++;
+		if( toolong )
+			error("Line too long, truncated");
 		P_force = 0;	/* No force unless bytes emitted */
 		N_page = 0;
 		   if(parse_line())
@@ -181,7 +196,7 @@ int parse_line(void)
 	register char *ptrto = Label;
 	char	*skip_white();
 
-	if( *ptrfrm == '*' || *ptrfrm == '\n' )
+	if( *ptrfrm == '*' || *ptrfrm == EOS )
 		return(0);	/* a comment line */
 
 	while( delim(*ptrfrm)== NO ){
@@ -206,7 +221,7 @@ int parse_line(void)
 	ptrfrm = skip_white(ptrfrm);
 
 	ptrto = Operand;
-	while( *ptrfrm != NEWLINE )
+	while( *ptrfrm != EOS )
 		*ptrto++ = *ptrfrm++;
 	*ptrto = EOS;
 
