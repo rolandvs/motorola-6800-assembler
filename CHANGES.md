@@ -39,6 +39,13 @@ Each item is a separate git commit.
   contiguous block; otherwise the assembler reports
   `ERROR bin is fragmented (code jumps to $xxxx), use s19tobin for a
   correct bin file`. The `.s19` is still written.
+- **New tool `s19tobin`** makes a correct binary image from the
+  S-records: gaps filled with `$FF` (or any byte with `-f`), an exact
+  EPROM window with `-s`/`-e`, and errors (no output) for bad
+  checksums, addresses written twice and data outside the window.
+  Reads S1, S2 and S3 records and CR/LF files. Unlike
+  `objcopy -O binary --gap-fill`, it does not silently lose data when
+  records overlap.
 - **Unknown options** stop the assembler instead of being ignored. The
   documented form `as5 prog - l cre` (lone minus) still works.
 
@@ -70,3 +77,9 @@ that the comment warning appears exactly where it should. The listings,
 symbol tables and cross references were checked to be identical to the
 old terminal output. All six assemblers run clean under AddressSanitizer
 and UBSan on these tests.
+
+For s19tobin, `make test` compares its output with reference images
+(checked against the image built from the S-records independently and
+against GNU objcopy), tests the `-s`/`-e` window, and checks that a
+duplicate address, a bad checksum, a non-S-record line and data outside
+the window are all refused without writing a file.

@@ -67,6 +67,26 @@ done
     fi
     rm -f frag1.* frag2.*
 }
+# s19tobin: padded images, EPROM window, and its error checks
+[ "$1" = update ] || {
+    S="$BIN/s19tobin"; ok=1
+    "$BIN/as9" s19tobin.asm >/dev/null 2>&1
+    "$S" s19tobin.s19 o.bin >/dev/null && cmp -s o.bin expected/s19tobin.bin || ok=0
+    "$S" -s E000 -e '$FFFF' s19tobin.s19 o.bin >/dev/null \
+        && cmp -s o.bin expected/s19tobin_e000.bin || ok=0
+    "$S" expected/t0.s19 o.bin >/dev/null && cmp -s o.bin expected/t0.bin || ok=0
+    rm -f o.bin
+    # each of these must fail and write no file
+    printf 'S10501000102F6\nS1040101AA4F\n' >e1.s19     # $0101 twice
+    printf 'S10501000102F7\n' >e2.s19                   # bad checksum
+    printf 'hello\n' >e3.s19                            # not an S-record
+    for e in "e1.s19" "e2.s19" "e3.s19" "-s FF10 s19tobin.s19"; do
+        "$S" $e o.bin 2>/dev/null && ok=0
+        [ -f o.bin ] && ok=0
+    done
+    if [ $ok = 1 ]; then echo "s19tobin: ok"; else echo "s19tobin: FAIL"; fail=1; fi
+    rm -f o.bin e1.s19 e2.s19 e3.s19 s19tobin.s19
+}
 # Upper case source must give the same code (no strings in these two)
 [ "$1" = update ] || for n in 9 11; do
     tr a-z A-Z <"t$n.asm" >"T$n.asm"

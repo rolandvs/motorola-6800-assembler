@@ -17,6 +17,8 @@ This module will build the following binaries for the specified Motorola micropr
 ./bin/as11  68HC11 processor
 ```
 
+and the tool `./bin/s19tobin`, which converts an S-record file to a binary memory image (see below).
+
 ## Compiling The Source Code
 
 All you need to do to compile the assemblers is to go to the main directly for this repository and run make as in the example below.
@@ -66,6 +68,22 @@ Only errors and warnings are written to the terminal.  An unknown option stops t
 Comments start with `*` or `;` at the beginning of a line, or with `;` after the operand.  An operand ends at the first blank, so `ldaa #bar - foo` assembles as `ldaa #bar`; option `w` gives a warning for any text after the operand that does not start with `;`.  For older sources with comments without `;`, such as the examples in ./test, use `now`.
 
 The binary file is a plain dump of the code, starting at its first address, so it is only written if the code is one contiguous block.  If an `org` or an `rmb` between code makes the addresses jump, the assembler reports `ERROR bin is fragmented (code jumps to $xxxx), use s19tobin for a correct bin file` and writes no `.bin` (the `.s19` is still written).
+
+### Making a binary image: s19tobin
+
+To program an EPROM, convert the S-records with s19tobin:
+
+```
+s19tobin [-f XX] [-s START] [-e END] prog.s19 prog.bin
+```
+
+Byte n of prog.bin belongs at address START+n, whatever the order of the `org`s in the source.  Without `-s` and `-e` the image runs from the lowest to the highest address in the file; gaps are filled with `$FF`, or with XX given by `-f`.  Numbers are hex, with or without `$` or `0x`.  For a 2764 EPROM at $E000:
+
+```
+s19tobin -s E000 -e FFFF prog.s19 prog.bin
+```
+
+s19tobin stops with an error, and writes no file, for a bad checksum, an address written twice, or data outside the `-s`/`-e` range.
 
 See [CHANGES.md](CHANGES.md) for the changes made to the original code.
 
