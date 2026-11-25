@@ -93,6 +93,16 @@ done
     if [ $ok = 1 ]; then echo "s19tobin: ok"; else echo "s19tobin: FAIL"; fail=1; fi
     rm -f o.bin e1.s19 e2.s19 e3.s19 s19tobin.s19
 }
+# Option syntax: "-a b", "-a -b" and "- a b" are the same; typos fail
+[ "$1" = update ] || {
+    ok=1
+    for o in "-now -s19" "-now s19" "- now s19"; do
+        rm -f t0.s19
+        "$BIN/as0" t0.asm $o >/dev/null 2>&1 && cmp -s t0.s19 expected/t0.s19 || ok=0
+    done
+    "$BIN/as0" t0.asm -now -s1 >/dev/null 2>&1 && ok=0
+    if [ $ok = 1 ]; then echo "as0: options ok"; else echo "as0: options FAIL"; fail=1; fi
+}
 # Upper case source must give the same code (no strings in these two).
 # Temporary files must not differ from real ones only in case: macOS
 # file systems ignore case, so T9.asm would overwrite t9.asm.
