@@ -175,6 +175,8 @@ static void do_indexed(int op)
 	eval();
 	if(!(*Optr++ == ',' && (*Optr == 'x' || *Optr == 'X')))
 		warn("Indexed Addressing Assumed");
+	else
+		Optr++;		/* past the x */
 	if(Force_word){
 		if(op < 0x80 ){ /* group 2, no extended addressing */
 			emit(op+0x10); /* default to one byte indexed */

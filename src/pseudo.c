@@ -99,6 +99,7 @@ void do_pseudo(int op /* which op */)
                                         }
                                 emit(Result);
                         }while( *Optr++ == ',' );
+                        Optr -= 1;      /* back on the terminator */
                         break;
                 case FDB:                       /* form double byte(s) */
                         do{
@@ -106,6 +107,7 @@ void do_pseudo(int op /* which op */)
                                 eval();
                                 eword(Result);
                         }while( *Optr++ == ',' );
+                        Optr -= 1;      /* back on the terminator */
                         break;
                 case FCC:                       /* form constant characters */
                         if(*Operand==EOS)
@@ -140,6 +142,7 @@ void do_pseudo(int op /* which op */)
                         break;
                 case OPT:                       /* assembler option */
                         P_force=0;
+                        Optr += strlen(Optr);   /* free text, no comment check */
                         if( head(Operand,"l") )
                                 Lflag=1;
                         else if( head(Operand,"nol"))
@@ -162,6 +165,7 @@ void do_pseudo(int op /* which op */)
                         break;
                 case PAGE:                      /* go to a new page */
                         P_force=0;
+                        Optr += strlen(Optr);   /* free text, no comment check */
                         N_page = 1;
                         if (Pass == 2 )
                          if (Lflag)  
@@ -174,6 +178,7 @@ void do_pseudo(int op /* which op */)
                         break;
                 case NULL_OP:                   /* ignored psuedo ops */
                         P_force=0;
+                        Optr += strlen(Optr);   /* nam/ttl/spc/end: free text */
                         break;
                 default:
                         fatal("Pseudo error");

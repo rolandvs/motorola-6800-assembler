@@ -209,6 +209,7 @@ void do_op(int opcode /* base opcode */, int class /* mnemonic class */)
 					}
 				while(*Optr != EOS && alpha(*Optr))Optr++;
 			}while( *Optr++ == ',' );
+			Optr -= 1;      /* back on the terminator */
 			emit(lobyte(pbyte));
 			return;
 		case P2NOIMM:
@@ -536,6 +537,7 @@ static void abd_index(int pbyte)
 
 	Optr += 2;
 	k=regnum();
+	while( alpha(*Optr) )Optr++;	/* past the index register */
 	pbyte += rtype(k);
 	emit(pbyte);
 	return;
