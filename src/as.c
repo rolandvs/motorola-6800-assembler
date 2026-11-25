@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
 	int	j = 0;
 
 	if(argc < 2){
-		printf("Usage: %s [files]\n",argv[j]);
+		printf("Usage: %s file... [- option...]\n",argv[j]);
+		printf("options: l nol c noc s cre s19 bin w now\n");
 		exit(1);
 		}
 	  Argv = argv;
@@ -70,6 +71,11 @@ int main(int argc, char *argv[])
 	     Oflag = 1;
 	   else if (strcmp(argv[j],"bin")==0)
 	     Bflag = 1;
+	   else if (*argv[j] != EOS)	/* a lone '-' is allowed */
+	     {
+	     printf("Unknown option: %s\n",argv[j]);
+	     exit(-1);
+	     }
 	    j++;
 	   }
 	  }
