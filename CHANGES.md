@@ -9,6 +9,28 @@ original notes are in
 They have been rewritten for the ANSI C, multi-file structure of this fork.
 Each item is a separate git commit.
 
+## How these changes were made
+
+The commits after the original fork were written with Claude (Claude
+Opus 5.5, an AI assistant by Anthropic). Claude worked from Albert van
+der Horst's 2004 as9 sources and notes, this fork's sources, and the
+instructions and design decisions of the maintainer of this fork. Each
+of these commits is marked `Co-Authored-By: Claude` in the git history.
+
+The changes were verified as follows:
+
+- `make test` checks that the generated code is byte for byte the same
+  as that of the original fork, for all six CPUs;
+- the binary output was cross-checked against GNU objcopy and against
+  a separate image builder;
+- all programs were run under AddressSanitizer and UBSan.
+
+Tests only cover what they test. Like any change, these may contain
+errors the tests don't catch; bug reports are welcome. The maintainer
+of this fork reviewed the changes and is responsible for them in this
+repository. They may be used, copied and changed under the same terms
+as the original code.
+
 ## From van der Horst's as9
 
 - **Larger limits:** 256 character lines, 80 character labels, 256

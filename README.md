@@ -208,6 +208,10 @@ MNPTR      e419 *0017 0028
 PUT        f0bb *0018 0029 
 ```
 
+## Note on AI Assistance
+
+The changes made after the original fork (see [CHANGES.md](CHANGES.md)) were written with the help of Claude, an AI assistant by Anthropic, and reviewed and tested by the maintainer of this fork.  They are provided as is, without warranty.  Check the code before using it for anything critical.
+
 ## Documentation
 
 I've included these files in the ./documentation directory.  File `assembler.txt` is the original documentation included with the sources for the assemblers.  The other file, `motorola_cross_asm_manual.pdf` is a manual for the Motorola assemblers that was published in 1990.  The information in this second file is not absolutely consistent with the assemblers used here, but it seems to be close and is a much more complete document than the text file.  So use at your own discretion.  `as9_changes_vanderhorst_2004.txt` describes Albert van der Horst's 2004 changes to as9, which have been carried over to all the assemblers (see CHANGES.md).
