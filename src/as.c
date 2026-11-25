@@ -122,6 +122,8 @@ void initialize(void)
 	N_page	  = 0;
 	Line[MAXBUF-1] = NEWLINE;
 
+	if( strlen(Argv[1]) + 5 > MAXPATH )  /* room for ".s19" */
+		fatal("File name too long");
 	strcpy(Obj_name,Argv[1]); /* copy first file name into array */
 	do {
 	    if (Obj_name[i]=='.')
@@ -182,16 +184,23 @@ int parse_line(void)
 	if( *ptrfrm == '*' || *ptrfrm == '\n' )
 		return(0);	/* a comment line */
 
-	while( delim(*ptrfrm)== NO )
-		*ptrto++ = *ptrfrm++;
-	if(*--ptrto != ':')ptrto++;     /* allow trailing : */
+	while( delim(*ptrfrm)== NO ){
+		if( ptrto < Label+MAXLAB-1 )
+			*ptrto++ = *ptrfrm;
+		ptrfrm++;
+		}
+	if( ptrto > Label && ptrto[-1] == ':' )  /* allow trailing : */
+		ptrto--;
 	*ptrto = EOS;
 
 	ptrfrm = skip_white(ptrfrm);
 
 	ptrto = Op;
-	while( delim(*ptrfrm) == NO)
-		*ptrto++ = mapdn(*ptrfrm++);
+	while( delim(*ptrfrm) == NO){
+		if( ptrto < Op+MAXOP-1 )
+			*ptrto++ = mapdn(*ptrfrm);
+		ptrfrm++;
+		}
 	*ptrto = EOS;
 
 	ptrfrm = skip_white(ptrfrm);
